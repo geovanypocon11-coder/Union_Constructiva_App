@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Unión Constructiva GT — App de Seguimiento</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --navy: #1A2540;
+      --orange: #F5A623;
+      --blue: #185FA5;
+      --blue-light: #E6F1FB;
+      --green: #3B6D11;
+      --green-light: #EAF3DE;
+      --orange-light: #FAEEDA;
+      --red: #A32D2D;
+      --red-light: #FCEBEB;
+      --purple: #534AB7;
+      --purple-light: #EEEDFE;
+      --bg: #f0f2f7;
+      --card: #ffffff;
+      --surface: #f7f8fc;
+      --border: rgba(0,0,0,0.10);
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px 16px 40px;
+    }
+
+    /* ── Desktop wrapper ── */
+    .desktop-hint {
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .desktop-hint .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .brand-logo {
+      width: 36px; height: 36px;
+      background: var(--navy);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-logo svg { width: 22px; height: 22px; stroke: var(--orange); fill: none; stroke-width: 1.6; }
+    .brand-name { font-size: 15px; font-weight: 600; color: var(--navy); }
+    .brand-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Phone frame ── */
+    .phone-outer {
+      width: 100%;
+      max-width: 390px;
+      background: #2a2a2a;
+      border-radius: 48px;
+      padding: 14px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.18);
+    }
+    .phone-inner {
+      background: var(--card);
+      border-radius: 38px;
+      overflow: hidden;
+      position: relative;
+      height: 720px;
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-notch {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 120px; height: 30px;
+      background: #2a2a2a;
+      border-radius: 0 0 18px 18px;
+      z-index: 100;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .screen.active { display: flex; }
+
+    /* STATUS BAR */
+    .status-bar {
+      background: var(--navy);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 36px 20px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .signal { display: flex; gap: 2px; align-items: flex-end; }
+    .signal span { background: #fff; border-radius: 1px; width: 3px; }
+    .signal span:nth-child(1) { height: 4px; }
+    .signal span:nth-child(2) { height: 6px; }
+    .signal span:nth-child(3) { height: 9px; }
+    .signal span:nth-child(4) { height: 12px; }
+    .status-icons { display: flex; gap: 6px; align-items: center; }
+
+    /* TOP NAV */
+    .topnav { background: var(--navy); color: #fff; padding: 10px 16px 14px; flex-shrink: 0; }
+    .topnav-row { display: flex; align-items: center; justify-content: space-between; }
+    .back-btn {
+      background: rgba(255,255,255,0.12);
+      border: none; color: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.22); }
+    .topnav h2 { font-size: 16px; font-weight: 600; margin-top: 8px; }
+    .topnav .topsub { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .badge-orange { background: var(--orange); color: var(--navy); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+    .badge-red { background: var(--red-light); color: var(--red); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      background: var(--card);
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      padding-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 9px 4px 6px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 10px;
+      transition: color 0.15s;
+    }
+    .nav-btn.active { color: var(--navy); }
+    .nav-btn svg { width: 22px; height: 22px; stroke-width: 1.6; }
+    .nav-active-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--orange); opacity: 0; }
+    .nav-btn.active .nav-active-dot { opacity: 1; }
+
+    /* SCROLL */
+    .scroll { flex: 1; overflow-y: auto; padding: 16px; }
+    .scroll::-webkit-scrollbar { width: 0; }
+
+    .sec-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+
+    /* ═══ LOGIN ═══ */
+    .login-wrap {
+      flex: 1;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 28px 24px;
+    }
+    .login-icon {
+      width: 76px; height: 76px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .login-icon svg { width: 44px; height: 44px; stroke: var(--orange); fill: none; stroke-width: 1.4; }
+    .login-title { color: #fff; font-size: 22px; font-weight: 700; text-align: center; }
+    .login-sub { color: rgba(255,255,255,0.5); font-size: 13px; text-align: center; margin: 6px 0 30px; }
+    .login-form { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+    .field-lbl { color: rgba(255,255,255,0.65); font-size: 12px; margin-bottom: 5px; }
+    .login-field {
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border: 0.5px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-field::placeholder { color: rgba(255,255,255,0.3); }
+    .login-field:focus { border-color: var(--orange); }
+    .login-cta {
+      width: 100%;
+      background: var(--orange);
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .login-cta:hover { opacity: 0.92; }
+    .login-cta:active { transform: scale(0.98); }
+    .login-forgot { color: rgba(255,255,255,0.4); font-size: 12px; text-align: center; cursor: pointer; }
+    .login-forgot:hover { color: var(--orange); }
+
+    /* ═══ DASHBOARD ═══ */
+    .dash-head {
+      background: var(--navy);
+      padding: 0 16px 16px;
+      flex-shrink: 0;
+    }
+    .dash-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .dash-greet { color: rgba(255,255,255,0.6); font-size: 12px; }
+    .dash-name { color: #fff; font-size: 17px; font-weight: 600; margin: 3px 0 12px; }
+    .msg-btn {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .msg-btn:hover { background: rgba(255,255,255,0.22); }
+    .msg-btn svg { stroke: #fff; width: 18px; height: 18px; fill: none; stroke-width: 1.8; }
+
+    .progress-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .prog-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .prog-top span { color: rgba(255,255,255,0.8); font-size: 12px; }
+    .prog-pct { color: var(--orange); font-size: 20px; font-weight: 700; }
+    .prog-track { background: rgba(255,255,255,0.2); border-radius: 4px; height: 7px; overflow: hidden; }
+    .prog-fill { background: var(--orange); height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+    .prog-phases { display: flex; justify-content: space-between; margin-top: 7px; }
+    .prog-phases span { color: rgba(255,255,255,0.45); font-size: 10px; }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      padding: 13px;
+    }
+    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .stat-val { font-size: 24px; font-weight: 700; }
+    .stat-hint { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .c-orange { color: var(--orange); }
+    .c-green  { color: var(--green); }
+    .c-blue   { color: var(--blue); }
+    .c-red    { color: var(--red); }
+
+    .act-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 0;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .act-item:hover { opacity: 0.75; }
+    .act-item:last-child { border-bottom: none; }
+    .act-ico {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .act-ico svg { width: 17px; height: 17px; fill: none; stroke-width: 1.8; }
+    .act-ico.blue  { background: var(--blue-light); }  .act-ico.blue svg  { stroke: var(--blue); }
+    .act-ico.green { background: var(--green-light); } .act-ico.green svg { stroke: var(--green); }
+    .act-ico.orng  { background: var(--orange-light);} .act-ico.orng svg  { stroke: #854F0B; }
+    .act-ico.red   { background: var(--red-light); }   .act-ico.red svg   { stroke: var(--red); }
+    .act-body { flex: 1; }
+    .act-title { font-size: 13px; font-weight: 500; color: var(--text); }
+    .act-desc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .act-time  { font-size: 10px; color: var(--text-muted); flex-shrink: 0; padding-top: 3px; }
+
+    /* ═══ FOTOS ═══ */
+    .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .photo-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .photo-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+    .photo-thumb {
+      height: 96px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .photo-thumb svg { width: 36px; height: 36px; fill: none; stroke-width: 1.2; opacity: 0.5; }
+    .photo-new {
+      position: absolute; top: 7px; right: 7px;
+      background: var(--navy); color: #fff;
+      font-size: 9px; font-weight: 700;
+      padding: 2px 7px; border-radius: 5px;
+    }
+    .photo-meta { padding: 9px 10px 10px; }
+    .photo-meta .pm-t { font-size: 12px; font-weight: 500; color: var(--text); }
+    .photo-meta .pm-d { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .ph-blue   { background: #ddeeff; } .ph-blue svg   { stroke: var(--blue); }
+    .ph-green  { background: #ddf0dd; } .ph-green svg  { stroke: var(--green); }
+    .ph-amber  { background: #fdefd0; } .ph-amber svg  { stroke: #854F0B; }
+    .ph-red    { background: #fde0e0; } .ph-red svg    { stroke: var(--red); }
+    .ph-purple { background: #eeeef8; } .ph-purple svg { stroke: var(--purple); }
+
+    /* ═══ CRONOGRAMA ═══ */
+    .fase { margin-bottom: 10px; }
+    .fase-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 13px;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: var(--card);
+      transition: background 0.15s;
+    }
+    .fase-hdr:hover { background: var(--surface); }
+    .fase-hdr-l { display: flex; align-items: center; gap: 9px; }
+    .fase-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .fase-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .fase-weeks { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .badge-done    { background: var(--green-light);  color: var(--green); border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
+    .badge-active  { background: var(--orange-light); color: #854F0B;      border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
+    .badge-pending { background: var(--surface);      color: var(--text-muted); border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
+    .fase-tasks {
+      display: none;
+      padding: 4px 13px 11px 32px;
+      border: 0.5px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      background: var(--surface);
+    }
+    .fase-tasks.open { display: block; }
+    .task-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 0;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 12px;
+    }
+    .task-row:last-child { border-bottom: none; }
+    .chk {
+      width: 17px; height: 17px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chk.done { background: var(--green); border-color: var(--green); }
+    .chk.done::after { content: ''; width: 8px; height: 5px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); display: block; }
+    .task-txt { color: var(--text); }
+    .task-txt.done { color: var(--text-muted); text-decoration: line-through; }
+
+    /* ═══ MATERIALES ═══ */
+    .mat-row {
+      display: flex; align-items: center; gap: 11px;
+      padding: 11px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .mat-row:last-child { border-bottom: none; }
+    .mat-ico {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .mat-ico svg { width: 19px; height: 19px; fill: none; stroke-width: 1.8; }
+    .mat-info { flex: 1; }
+    .mat-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .mat-qty  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .mat-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .mat-pct { font-size: 12px; font-weight: 600; }
+    .mini-bar { width: 64px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .mini-fill { height: 100%; border-radius: 3px; }
+    .status-ok   .mat-pct { color: var(--green); }  .status-ok .mini-fill   { background: var(--green); }
+    .status-warn .mat-pct { color: #854F0B; }        .status-warn .mini-fill { background: var(--orange); }
+    .status-low  .mat-pct { color: var(--red); }     .status-low .mini-fill  { background: var(--red); }
+    .alert-box {
+      margin-top: 14px;
+      background: var(--red-light);
+      border: 0.5px solid #F09595;
+      border-radius: var(--radius-md);
+      padding: 13px;
+    }
+    .alert-title { font-size: 12px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
+    .alert-desc  { font-size: 12px; color: var(--red); line-height: 1.5; }
+
+    /* ═══ MENSAJES ═══ */
+    .msg-head {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 11px;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600;
+      color: var(--blue);
+      flex-shrink: 0;
+    }
+    .sv-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .sv-role { font-size: 11px; color: var(--text-muted); }
+    .online-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; margin-left: auto; flex-shrink: 0; }
+
+    .msgs-area { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+    .msgs-area::-webkit-scrollbar { width: 0; }
+    .bubble-wrap { max-width: 80%; display: flex; flex-direction: column; gap: 3px; }
+    .bubble-wrap.them { align-self: flex-start; }
+    .bubble-wrap.me   { align-self: flex-end; }
+    .bubble {
+      padding: 10px 13px;
+      font-size: 13px;
+      line-height: 1.5;
+      border-radius: 14px;
+    }
+    .them .bubble {
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 4px 14px 14px 14px;
+    }
+    .me .bubble {
+      background: var(--navy);
+      color: #fff;
+      border-radius: 14px 4px 14px 14px;
+    }
+    .btime { font-size: 10px; color: var(--text-muted); }
+    .me .btime { text-align: right; }
+
+    .input-area {
+      padding: 11px 14px;
+      border-top: 0.5px solid var(--border);
+      display: flex; align-items: center; gap: 9px;
+      flex-shrink: 0;
+      background: var(--card);
+    }
+    .msg-inp {
+      flex: 1;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 22px;
+      padding: 10px 15px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .msg-inp:focus { border-color: var(--navy); }
+    .send-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--navy);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .send-btn:hover { background: var(--blue); }
+    .send-btn svg { width: 17px; height: 17px; stroke: #fff; fill: none; stroke-width: 2; }
+
+    /* ── Responsive: on mobile, remove phone frame ── */
+    @media (max-width: 480px) {
+      body { padding: 0; background: var(--bg); justify-content: flex-start; }
+      .desktop-hint { display: none; }
+      .phone-outer { border-radius: 0; padding: 0; max-width: 100%; box-shadow: none; background: transparent; }
+      .phone-inner { border-radius: 0; height: 100dvh; }
+      .phone-notch { display: none; }
+      .status-bar { padding: 12px 16px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="desktop-hint">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24"><polygon points="12,3 22,10 22,21 2,21 2,10"/><rect x="9" y="14" width="6" height="7" rx="1"/><rect x="5" y="10" width="5" height="5" rx="1"/><rect x="14" y="10" width="5" height="5" rx="1"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">Unión Constructiva GT</div>
+      <div class="brand-sub">Plataforma de seguimiento digital</div>
+    </div>
+  </div>
+</div>
+
+<div class="phone-outer">
+  <div class="phone-inner">
+    <div class="phone-notch"></div>
+
+    <!-- ═══════════ LOGIN ═══════════ -->
+    <div class="screen active" id="s-login">
+      <div class="status-bar" style="padding-top:44px">
+        <span>9:41</span>
+        <div class="status-icons">
+          <div class="signal"><span></span><span></span><span></span><span></span></div>
+          <svg width="15" height="11" fill="none" stroke="#fff" stroke-width="1.3" viewBox="0 0 15 11"><rect x="0.5" y="1" width="11" height="8" rx="1.5"/><path d="M12 3.5h1.5a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H12"/><rect x="1.5" y="2" width="8.5" height="6" rx="0.8" fill="#fff"/></svg>
+        </div>
+      </div>
+      <div class="login-wrap">
+        <div class="login-icon">
+          <svg viewBox="0 0 44 44">
+            <polygon points="22,4 40,16 40,38 4,38 4,16"/>
+            <rect x="16" y="25" width="12" height="13" rx="2"/>
+            <rect x="8" y="16" width="10" height="10" rx="1.5"/>
+            <rect x="26" y="16" width="10" height="10" rx="1.5"/>
+            <circle cx="36" cy="10" r="6" fill="none" stroke="#4A9EF5" stroke-width="1.4"/>
+            <line x1="33" y1="8" x2="39" y2="8" stroke="#4A9EF5" stroke-width="1.2"/>
+            <line x1="33" y1="10" x2="39" y2="10" stroke="#4A9EF5" stroke-width="1.2"/>
+            <line x1="33" y1="12" x2="39" y2="12" stroke="#4A9EF5" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="login-title">Unión Constructiva GT</div>
+        <div class="login-sub">Seguimiento digital de tu proyecto</div>
+        <div class="login-form">
+          <div>
+            <div class="field-lbl">Correo electrónico</div>
+            <input class="login-field" type="email" placeholder="tu@correo.com" value="cliente@ejemplo.com">
+          </div>
+          <div>
+            <div class="field-lbl">Contraseña</div>
+            <input class="login-field" type="password" value="12345678">
+          </div>
+          <button class="login-cta" onclick="goTo('dashboard')">Ingresar al proyecto</button>
+          <div class="login-forgot">¿Olvidaste tu contraseña?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ DASHBOARD ═══════════ -->
+    <div class="screen" id="s-dashboard">
+      <div class="status-bar" style="padding-top:44px">
+        <span>9:41</span>
+        <div class="status-icons">
+          <div class="signal"><span></span><span></span><span></span><span></span></div>
+          <svg width="15" height="11" fill="none" stroke="#fff" stroke-width="1.3" viewBox="0 0 15 11"><rect x="0.5" y="1" width="11" height="8" rx="1.5"/><path d="M12 3.5h1.5a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H12"/><rect x="1.5" y="2" width="8.5" height="6" rx="0.8" fill="#fff"/></svg>
+        </div>
+      </div>
+      <div class="dash-head">
+        <div class="dash-top">
+          <div>
+            <div class="dash-greet">Bienvenido,</div>
+            <div class="dash-name">Julio Pocón</div>
+          </div>
+          <button class="msg-btn" onclick="goTo('mensajes')">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </div>
+        <div class="progress-card">
+          <div class="prog-top">
+            <span>Avance general del proyecto</span>
+            <span class="prog-pct">62%</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="main-bar" style="width:0%"></div></div>
+          <div class="prog-phases">
+            <span>Planif. ✓</span><span>Obra ✓</span><span>Acabados</span><span>Entrega</span>
+          </div>
+        </div>
+      </div>
+      <div class="scroll">
+        <div class="sec-label">Resumen</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-lbl">Días transcurridos</div><div class="stat-val c-orange">47</div><div class="stat-hint">de ~120 estimados</div></div>
+          <div class="stat-card"><div class="stat-lbl">Tareas completadas</div><div class="stat-val c-green">18</div><div class="stat-hint">de 29 planificadas</div></div>
+          <div class="stat-card"><div class="stat-lbl">Fotos del avance</div><div class="stat-val c-blue">34</div><div class="stat-hint">última: hoy</div></div>
+          <div class="stat-card"><div class="stat-lbl">Alertas activas</div><div class="stat-val c-red">1</div><div class="stat-hint">cemento bajo</div></div>
+        </div>
+        <div class="sec-label">Actividad reciente</div>
+        <div class="act-item" onclick="goTo('fotos')">
+          <div class="act-ico blue"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/><path d="M3 9h2"/></svg></div>
+          <div class="act-body"><div class="act-title">12 fotos nuevas — Instalación eléctrica</div><div class="act-desc">Fase 4 · Instalaciones</div></div>
+          <div class="act-time">Hoy</div>
+        </div>
+        <div class="act-item" onclick="goTo('cronograma')">
+          <div class="act-ico green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg></div>
+          <div class="act-body"><div class="act-title">Reporte semanal publicado</div><div class="act-desc">Semana 7 · Arq. García</div></div>
+          <div class="act-time">Ayer</div>
+        </div>
+        <div class="act-item" onclick="goTo('materiales')">
+          <div class="act-ico red"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="act-body"><div class="act-title">Alerta: cemento al 15%</div><div class="act-desc">Materiales · reposición requerida</div></div>
+          <div class="act-time">Ayer</div>
+        </div>
+        <div class="act-item" onclick="goTo('materiales')">
+          <div class="act-ico orng"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          <div class="act-body"><div class="act-title">Entrega de materiales registrada</div><div class="act-desc">Block 15×20, 400 unidades</div></div>
+          <div class="act-time">Lun</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn active" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+      </div>
+    </div>
+
+    <!-- ═══════════ FOTOS ═══════════ -->
+    <div class="screen" id="s-fotos">
+      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
+      <div class="topnav">
+        <div class="topnav-row"><button class="back-btn" onclick="goTo('dashboard')">← Inicio</button><span class="badge-orange">34 fotos</span></div>
+        <h2>Historial fotográfico</h2><div class="topsub">Proyecto Vivienda Pocón · 6×15m</div>
+      </div>
+      <div class="scroll">
+        <div class="sec-label">Esta semana</div>
+        <div class="photo-grid">
+          <div class="photo-card"><div class="photo-thumb ph-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M5 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2l-2-2H9L7 3z"/></svg><span class="photo-new">HOY</span></div><div class="photo-meta"><div class="pm-t">Cableado zona sala</div><div class="pm-d">7 mayo · 14:30</div></div></div>
+          <div class="photo-card"><div class="photo-thumb ph-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M5 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2l-2-2H9L7 3z"/></svg><span class="photo-new">HOY</span></div><div class="photo-meta"><div class="pm-t">Plomería cocina</div><div class="pm-d">7 mayo · 11:15</div></div></div>
+          <div class="photo-card"><div class="photo-thumb ph-amber"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg></div><div class="photo-meta"><div class="pm-t">Muros habitación 2</div><div class="pm-d">6 mayo</div></div></div>
+          <div class="photo-card"><div class="photo-thumb ph-green"><svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div><div class="photo-meta"><div class="pm-t">Columnas frontales</div><div class="pm-d">5 mayo</div></div></div>
+        </div>
+        <div class="sec-label" style="margin-top:16px">Semana anterior</div>
+        <div class="photo-grid">
+          <div class="photo-card"><div class="photo-thumb ph-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div><div class="photo-meta"><div class="pm-t">Losa entrepiso</div><div class="pm-d">30 abril</div></div></div>
+          <div class="photo-card"><div class="photo-thumb ph-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div><div class="photo-meta"><div class="pm-t">Cimentación completa</div><div class="pm-d">28 abril</div></div></div>
+          <div class="photo-card"><div class="photo-thumb ph-purple"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div><div class="photo-meta"><div class="pm-t">Vista general obra</div><div class="pm-d">25 abril</div></div></div>
+          <div class="photo-card"><div class="photo-thumb ph-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M5 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2l-2-2H9L7 3z"/></svg></div><div class="photo-meta"><div class="pm-t">Acero de refuerzo</div><div class="pm-d">23 abril</div></div></div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
+        <button class="nav-btn active" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+      </div>
+    </div>
+
+    <!-- ═══════════ CRONOGRAMA ═══════════ -->
+    <div class="screen" id="s-cronograma">
+      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
+      <div class="topnav">
+        <div class="topnav-row"><button class="back-btn" onclick="goTo('dashboard')">← Inicio</button><span class="badge-orange">Sem. 7 de 17</span></div>
+        <h2>Cronograma de obra</h2><div class="topsub">Toca cada fase para ver tareas</div>
+      </div>
+      <div class="scroll">
+        <div class="fase">
+          <div class="fase-hdr" onclick="toggleFase('f1')"><div class="fase-hdr-l"><div class="fase-dot" style="background:var(--green)"></div><div><div class="fase-name">Fase 1 — Planificación</div><div class="fase-weeks">Semanas 1–2</div></div></div><span class="badge-done">Completada</span></div>
+          <div class="fase-tasks" id="f1">
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Reunión inicial con cliente</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Diseño preliminar y planos</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Elaboración de presupuesto</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Firma de contrato</span></div>
+          </div>
+        </div>
+        <div class="fase">
+          <div class="fase-hdr" onclick="toggleFase('f2')"><div class="fase-hdr-l"><div class="fase-dot" style="background:var(--green)"></div><div><div class="fase-name">Fase 2 — Trámites</div><div class="fase-weeks">Semanas 3–4</div></div></div><span class="badge-done">Completada</span></div>
+          <div class="fase-tasks" id="f2">
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Gestión permiso municipal</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Compra inicial de materiales</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Planificación logística</span></div>
+          </div>
+        </div>
+        <div class="fase">
+          <div class="fase-hdr" onclick="toggleFase('f3')"><div class="fase-hdr-l"><div class="fase-dot" style="background:var(--green)"></div><div><div class="fase-name">Fase 3 — Obra gruesa</div><div class="fase-weeks">Semanas 5–10</div></div></div><span class="badge-done">Completada</span></div>
+          <div class="fase-tasks" id="f3">
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Movimiento de tierra</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Cimentación</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Estructura y vigas</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Muros perimetrales</span></div>
+          </div>
+        </div>
+        <div class="fase">
+          <div class="fase-hdr" onclick="toggleFase('f4')"><div class="fase-hdr-l"><div class="fase-dot" style="background:#BA7517"></div><div><div class="fase-name">Fase 4 — Instalaciones</div><div class="fase-weeks">Semanas 11–16 · En progreso</div></div></div><span class="badge-active">En progreso</span></div>
+          <div class="fase-tasks open" id="f4">
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Instalación eléctrica principal</span></div>
+            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Plomería principal</span></div>
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Cableado secundario habitaciones</span></div>
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Revestimientos y pisos</span></div>
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Pintura interior</span></div>
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Carpintería y puertas</span></div>
+          </div>
+        </div>
+        <div class="fase">
+          <div class="fase-hdr" onclick="toggleFase('f5')"><div class="fase-hdr-l"><div class="fase-dot" style="background:#ccc"></div><div><div class="fase-name">Fase 5 — Entrega</div><div class="fase-weeks">Semana 17</div></div></div><span class="badge-pending">Pendiente</span></div>
+          <div class="fase-tasks" id="f5">
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Inspección final</span></div>
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Correcciones menores</span></div>
+            <div class="task-row"><div class="chk"></div><span class="task-txt">Entrega formal al cliente</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
+        <button class="nav-btn active" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+      </div>
+    </div>
+
+    <!-- ═══════════ MATERIALES ═══════════ -->
+    <div class="screen" id="s-materiales">
+      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
+      <div class="topnav">
+        <div class="topnav-row"><button class="back-btn" onclick="goTo('dashboard')">← Inicio</button><span class="badge-red">1 alerta</span></div>
+        <h2>Control de materiales</h2><div class="topsub">Inventario actualizado al 7 mayo</div>
+      </div>
+      <div class="scroll">
+        <div class="sec-label">Estado de inventario</div>
+        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--blue-light)"><svg viewBox="0 0 24 24" stroke="var(--blue)"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20M2 15h20M12 3v18"/></svg></div><div class="mat-info"><div class="mat-name">Block 15×20 cm</div><div class="mat-qty">580 unidades · Entregadas: 800</div></div><div class="mat-right"><div class="mat-pct">73%</div><div class="mini-bar"><div class="mini-fill" style="width:73%"></div></div></div></div>
+        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--green-light)"><svg viewBox="0 0 24 24" stroke="var(--green)"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><div class="mat-info"><div class="mat-name">Hierro #3 (varillas)</div><div class="mat-qty">45 varillas · Entregadas: 60</div></div><div class="mat-right"><div class="mat-pct">75%</div><div class="mini-bar"><div class="mini-fill" style="width:75%"></div></div></div></div>
+        <div class="mat-row status-warn"><div class="mat-ico" style="background:var(--orange-light)"><svg viewBox="0 0 24 24" stroke="#854F0B"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div><div class="mat-info"><div class="mat-name">Arena amarilla (m³)</div><div class="mat-qty">3.5 m³ restantes · Usados: 6.5</div></div><div class="mat-right"><div class="mat-pct">35%</div><div class="mini-bar"><div class="mini-fill" style="width:35%"></div></div></div></div>
+        <div class="mat-row status-low"><div class="mat-ico" style="background:var(--red-light)"><svg viewBox="0 0 24 24" stroke="var(--red)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="mat-info"><div class="mat-name">Cemento (sacos)</div><div class="mat-qty">8 sacos · Usados: 45 de 53</div></div><div class="mat-right"><div class="mat-pct">15%</div><div class="mini-bar"><div class="mini-fill" style="width:15%"></div></div></div></div>
+        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--purple-light)"><svg viewBox="0 0 24 24" stroke="var(--purple)"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div><div class="mat-info"><div class="mat-name">Cable eléctrico (mts)</div><div class="mat-qty">180 mts · Entregados: 250</div></div><div class="mat-right"><div class="mat-pct">72%</div><div class="mini-bar"><div class="mini-fill" style="width:72%;background:var(--purple)"></div></div></div></div>
+        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--green-light)"><svg viewBox="0 0 24 24" stroke="var(--green)"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div><div class="mat-info"><div class="mat-name">Tubo PVC 1/2" (und.)</div><div class="mat-qty">22 unidades restantes</div></div><div class="mat-right"><div class="mat-pct">55%</div><div class="mini-bar"><div class="mini-fill" style="width:55%"></div></div></div></div>
+        <div class="alert-box"><div class="alert-title">Acción requerida</div><div class="alert-desc">Cemento por agotarse. Arq. García fue notificada. Reposición estimada: 2 días hábiles.</div></div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
+        <button class="nav-btn active" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+      </div>
+    </div>
+
+    <!-- ═══════════ MENSAJES ═══════════ -->
+    <div class="screen" id="s-mensajes">
+      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
+      <div class="msg-head">
+        <div class="avatar">AG</div>
+        <div><div class="sv-name">Arq. Ana García</div><div class="sv-role">Supervisora · Unión Constructiva GT</div></div>
+        <div class="online-dot"></div>
+      </div>
+      <div class="msgs-area" id="msg-area">
+        <div class="bubble-wrap them"><div class="bubble">Buenos días Sr. Pocón. Le confirmo que hoy iniciamos con el cableado eléctrico de sala y comedor.</div><div class="btime">Lun 9:10</div></div>
+        <div class="bubble-wrap me"><div class="bubble">Gracias Arq. García, ¿cuándo subirán las fotos al sistema?</div><div class="btime">Lun 9:32</div></div>
+        <div class="bubble-wrap them"><div class="bubble">Las fotos ya están en el historial. Subimos 12 registros hoy. El avance general llegó al 62%.</div><div class="btime">Hoy 14:45</div></div>
+        <div class="bubble-wrap them"><div class="bubble">Le notifico que el cemento está por agotarse. Ya gestioné la reposición, estará en obra en 2 días hábiles.</div><div class="btime">Hoy 15:02</div></div>
+        <div class="bubble-wrap me"><div class="bubble">Entendido. ¿Eso afecta el cronograma?</div><div class="btime">Hoy 15:10</div></div>
+      </div>
+      <div class="input-area">
+        <input class="msg-inp" id="msg-inp" type="text" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg></button>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
+        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
+        <button class="nav-btn active" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+      </div>
+    </div>
+
+  </div><!-- phone-inner -->
+</div><!-- phone-outer -->
+
+<script>
+  function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('s-' + id).classList.add('active');
+    if (id === 'dashboard') {
+      setTimeout(() => { document.getElementById('main-bar').style.width = '62%'; }, 120);
+    }
+  }
+  function toggleFase(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+  function sendMsg() {
+    var inp = document.getElementById('msg-inp');
+    var txt = inp.value.trim();
+    if (!txt) return;
+    var area = document.getElementById('msg-area');
+    var d = document.createElement('div');
+    d.className = 'bubble-wrap me';
+    d.innerHTML = '<div class="bubble">' + txt + '</div><div class="btime">Ahora</div>';
+    area.appendChild(d);
+    inp.value = '';
+    area.scrollTop = area.scrollHeight;
+    setTimeout(function() {
+      var r = document.createElement('div');
+      r.className = 'bubble-wrap them';
+      r.innerHTML = '<div class="bubble">Recibido Sr. Pocón. Le respondo a la brevedad.</div><div class="btime">Ahora</div>';
+      area.appendChild(r);
+      area.scrollTop = area.scrollHeight;
+    }, 1300);
+  }
+  setTimeout(() => { document.getElementById('main-bar').style.width = '62%'; }, 400);
+</script>
+</body>
+</html>
+Listo
+El código ya está arriba, pero es más fácil descargarlo directamente desde el archivo que ya tienes. Para pegarlo en Netlify o GitHub:
+
+Pasos rápidos con Netlify Drop (sin cuenta):
+
+Descarga el archivo union_constructiva_app.html que te compartí arriba
+Entra a app.netlify.com/drop
+Arrastra el archivo ahí
+En 30 segundos tienes tu URL pública lista
+Si de todas formas necesitas copiar el código manualmente, está todo entre las etiquetas <!DOCTYPE html> hasta </html> en la respuesta de arriba. Lo seleccionas todo, lo copias, lo pegas en un archivo nuevo que guardes como index.html y listo.
