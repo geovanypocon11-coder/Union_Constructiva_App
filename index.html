@@ -1,815 +1,907 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Unión Constructiva GT — App de Seguimiento</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Unión Constructiva GT</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#1A2540;--orange:#F5A623;--blue:#185FA5;
+  --blue-light:#E6F1FB;--green:#2D6A0A;--green-light:#EAF3DE;
+  --orange-light:#FAEEDA;--red:#A32D2D;--red-light:#FCEBEB;
+  --purple:#534AB7;--purple-light:#EEEDFE;
+  --bg:#ECF0F8;--card:#fff;--surface:#F5F7FC;
+  --border:rgba(0,0,0,0.09);--text:#18192E;--muted:#6B7280;
+  --r:10px;--r2:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 12px 40px}
 
-    :root {
-      --navy: #1A2540;
-      --orange: #F5A623;
-      --blue: #185FA5;
-      --blue-light: #E6F1FB;
-      --green: #3B6D11;
-      --green-light: #EAF3DE;
-      --orange-light: #FAEEDA;
-      --red: #A32D2D;
-      --red-light: #FCEBEB;
-      --purple: #534AB7;
-      --purple-light: #EEEDFE;
-      --bg: #f0f2f7;
-      --card: #ffffff;
-      --surface: #f7f8fc;
-      --border: rgba(0,0,0,0.10);
-      --text: #1a1a2e;
-      --text-muted: #6b7280;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-    }
+/* ── PHONE FRAME ── */
+.frame-label{max-width:420px;width:100%;text-align:center;margin-bottom:12px}
+.brand-row{display:flex;align-items:center;justify-content:center;gap:10px}
+.brand-ico{width:34px;height:34px;background:var(--navy);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.brand-ico svg{width:20px;height:20px;stroke:var(--orange);fill:none;stroke-width:1.6}
+.brand-name{font-size:14px;font-weight:600;color:var(--navy)}
+.brand-sub{font-size:11px;color:var(--muted)}
+.phone-wrap{width:100%;max-width:400px;background:#222;border-radius:46px;padding:13px;box-shadow:0 30px 70px rgba(0,0,0,0.3)}
+.phone{background:var(--card);border-radius:36px;overflow:hidden;position:relative;height:740px;display:flex;flex-direction:column}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:110px;height:28px;background:#222;border-radius:0 0 16px 16px;z-index:200}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 20px 16px 40px;
-    }
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden}
+.screen.on{display:flex}
 
-    /* ── Desktop wrapper ── */
-    .desktop-hint {
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .desktop-hint .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-    .brand-logo {
-      width: 36px; height: 36px;
-      background: var(--navy);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .brand-logo svg { width: 22px; height: 22px; stroke: var(--orange); fill: none; stroke-width: 1.6; }
-    .brand-name { font-size: 15px; font-weight: 600; color: var(--navy); }
-    .brand-sub { font-size: 12px; color: var(--text-muted); }
+/* STATUS */
+.sbar{background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:34px 18px 7px;font-size:12px;font-weight:500;flex-shrink:0}
+.sig{display:flex;gap:2px;align-items:flex-end}
+.sig span{background:#fff;border-radius:1px;width:3px}
+.sig span:nth-child(1){height:4px}.sig span:nth-child(2){height:6px}.sig span:nth-child(3){height:9px}.sig span:nth-child(4){height:12px}
 
-    /* ── Phone frame ── */
-    .phone-outer {
-      width: 100%;
-      max-width: 390px;
-      background: #2a2a2a;
-      border-radius: 48px;
-      padding: 14px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.18);
-    }
-    .phone-inner {
-      background: var(--card);
-      border-radius: 38px;
-      overflow: hidden;
-      position: relative;
-      height: 720px;
-      display: flex;
-      flex-direction: column;
-    }
-    .phone-notch {
-      position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 120px; height: 30px;
-      background: #2a2a2a;
-      border-radius: 0 0 18px 18px;
-      z-index: 100;
-    }
+/* TOP NAV */
+.tnav{background:var(--navy);color:#fff;padding:8px 14px 13px;flex-shrink:0}
+.tnav-row{display:flex;align-items:center;justify-content:space-between}
+.back{background:rgba(255,255,255,0.12);border:none;color:#fff;border-radius:8px;padding:5px 11px;font-size:12px;cursor:pointer;transition:background .15s}
+.back:hover{background:rgba(255,255,255,0.22)}
+.tnav h2{font-size:15px;font-weight:600;margin-top:7px}
+.tnav .sub{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px}
+.badge{border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700}
+.badge-o{background:var(--orange);color:var(--navy)}
+.badge-r{background:var(--red-light);color:var(--red)}
+.badge-g{background:var(--green-light);color:var(--green)}
 
-    /* ── Screens ── */
-    .screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-    .screen.active { display: flex; }
+/* BOTTOM NAV */
+.bnav{background:var(--card);border-top:.5px solid var(--border);display:flex;padding-bottom:6px;flex-shrink:0}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 5px;background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:9px;transition:color .15s}
+.nb.on{color:var(--navy)}
+.nb svg{width:21px;height:21px;stroke-width:1.6}
+.nd{width:4px;height:4px;border-radius:50%;background:var(--orange);opacity:0}
+.nb.on .nd{opacity:1}
 
-    /* STATUS BAR */
-    .status-bar {
-      background: var(--navy);
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 36px 20px 8px;
-      font-size: 12px;
-      font-weight: 500;
-      flex-shrink: 0;
-    }
-    .signal { display: flex; gap: 2px; align-items: flex-end; }
-    .signal span { background: #fff; border-radius: 1px; width: 3px; }
-    .signal span:nth-child(1) { height: 4px; }
-    .signal span:nth-child(2) { height: 6px; }
-    .signal span:nth-child(3) { height: 9px; }
-    .signal span:nth-child(4) { height: 12px; }
-    .status-icons { display: flex; gap: 6px; align-items: center; }
+/* SCROLL */
+.sc{flex:1;overflow-y:auto;padding:14px}
+.sc::-webkit-scrollbar{width:0}
+.slbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
 
-    /* TOP NAV */
-    .topnav { background: var(--navy); color: #fff; padding: 10px 16px 14px; flex-shrink: 0; }
-    .topnav-row { display: flex; align-items: center; justify-content: space-between; }
-    .back-btn {
-      background: rgba(255,255,255,0.12);
-      border: none; color: #fff;
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .back-btn:hover { background: rgba(255,255,255,0.22); }
-    .topnav h2 { font-size: 16px; font-weight: 600; margin-top: 8px; }
-    .topnav .topsub { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-    .badge-orange { background: var(--orange); color: var(--navy); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
-    .badge-red { background: var(--red-light); color: var(--red); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+/* ── MODALS ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);z-index:500;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.on{display:flex}
+.modal-box{background:var(--card);border-radius:20px 20px 0 0;width:100%;padding:20px 18px 28px;max-height:85%;overflow-y:auto}
+.modal-box::-webkit-scrollbar{width:0}
+.modal-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:var(--surface);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.field-group{margin-bottom:13px}
+.field-group label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.field-group input,.field-group select,.field-group textarea{width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;font-family:inherit}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--navy)}
+.field-group textarea{resize:none;height:72px}
+.btn-primary{width:100%;background:var(--navy);border:none;border-radius:var(--r);padding:13px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:4px}
+.btn-primary:hover{opacity:.9}
+.btn-primary:active{transform:scale(.98)}
+.btn-secondary{width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:12px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;margin-top:8px}
 
-    /* BOTTOM NAV */
-    .bottom-nav {
-      background: var(--card);
-      border-top: 0.5px solid var(--border);
-      display: flex;
-      padding-bottom: 8px;
-      flex-shrink: 0;
-    }
-    .nav-btn {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      padding: 9px 4px 6px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 10px;
-      transition: color 0.15s;
-    }
-    .nav-btn.active { color: var(--navy); }
-    .nav-btn svg { width: 22px; height: 22px; stroke-width: 1.6; }
-    .nav-active-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--orange); opacity: 0; }
-    .nav-btn.active .nav-active-dot { opacity: 1; }
+/* NOTIFICATION TOAST */
+.toast{position:absolute;top:60px;left:12px;right:12px;background:var(--navy);color:#fff;border-radius:12px;padding:11px 14px;font-size:12px;z-index:600;display:none;align-items:flex-start;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+.toast.show{display:flex;animation:slideIn .35s ease}
+.toast-ico{width:28px;height:28px;border-radius:8px;background:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast-ico svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2}
+.toast-body .t-title{font-weight:600;font-size:12px}
+.toast-body .t-sub{color:rgba(255,255,255,0.65);font-size:11px;margin-top:2px}
+@keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
 
-    /* SCROLL */
-    .scroll { flex: 1; overflow-y: auto; padding: 16px; }
-    .scroll::-webkit-scrollbar { width: 0; }
+/* ─── LOGIN ─── */
+.login-bg{flex:1;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 26px 20px}
+.l-ico{width:72px;height:72px;background:rgba(255,255,255,0.1);border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.l-ico svg{width:42px;height:42px;stroke:var(--orange);fill:none;stroke-width:1.4}
+.l-title{color:#fff;font-size:21px;font-weight:700;text-align:center}
+.l-sub{color:rgba(255,255,255,.5);font-size:12px;text-align:center;margin:5px 0 26px}
+.lform{width:100%;display:flex;flex-direction:column;gap:12px}
+.lbl{color:rgba(255,255,255,.65);font-size:11px;margin-bottom:4px;font-weight:500}
+.linput{width:100%;background:rgba(255,255,255,.1);border:.5px solid rgba(255,255,255,.2);border-radius:10px;padding:11px 13px;color:#fff;font-size:13px;outline:none;transition:border-color .2s;font-family:inherit}
+.linput::placeholder{color:rgba(255,255,255,.3)}
+.linput:focus{border-color:var(--orange)}
+.lcta{width:100%;background:var(--orange);border:none;border-radius:10px;padding:13px;color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;transition:opacity .15s,transform .1s}
+.lcta:hover{opacity:.9}
+.lcta:active{transform:scale(.98)}
+.l-link{color:rgba(255,255,255,.4);font-size:11px;text-align:center;cursor:pointer}
+.l-link:hover{color:var(--orange)}
+.user-list{margin-top:18px;width:100%}
+.user-list-title{color:rgba(255,255,255,.5);font-size:10px;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.user-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 10px;margin:3px;cursor:pointer;transition:background .15s}
+.user-chip:hover{background:rgba(255,255,255,.16)}
+.user-chip span{color:#fff;font-size:11px}
+.user-chips-wrap{display:flex;flex-wrap:wrap;justify-content:center}
 
-    .sec-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 10px;
-    }
+/* ─── DASHBOARD ─── */
+.dash-head{background:var(--navy);padding:0 14px 14px;flex-shrink:0}
+.dash-top{display:flex;justify-content:space-between;align-items:flex-start}
+.d-greet{color:rgba(255,255,255,.6);font-size:11px}
+.d-name{color:#fff;font-size:16px;font-weight:600;margin:2px 0 10px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.d-name .edit-ico{opacity:.5;font-size:13px}
+.d-name:hover .edit-ico{opacity:1}
+.icon-btn{width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.icon-btn:hover{background:rgba(255,255,255,.22)}
+.icon-btn svg{stroke:#fff;width:17px;height:17px;fill:none;stroke-width:1.8}
+.prog-card{background:rgba(255,255,255,.1);border-radius:12px;padding:13px;cursor:pointer}
+.prog-card:hover{background:rgba(255,255,255,.15)}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.prog-top span{color:rgba(255,255,255,.8);font-size:12px}
+.prog-pct{color:var(--orange);font-size:19px;font-weight:700}
+.prog-track{background:rgba(255,255,255,.2);border-radius:4px;height:7px;overflow:hidden}
+.prog-fill{background:var(--orange);height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.prog-phases{display:flex;justify-content:space-between;margin-top:6px}
+.prog-phases span{color:rgba(255,255,255,.4);font-size:9px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-card{background:var(--surface);border-radius:var(--r);padding:12px}
+.s-lbl{font-size:10px;color:var(--muted);margin-bottom:3px}
+.s-val{font-size:22px;font-weight:700}
+.s-hint{font-size:10px;color:var(--muted);margin-top:2px}
+.co{color:var(--orange)}.cg{color:var(--green)}.cb{color:var(--blue)}.cr{color:var(--red)}
+.act-row{display:flex;align-items:flex-start;gap:9px;padding:10px 0;border-bottom:.5px solid var(--border);cursor:pointer;transition:opacity .15s}
+.act-row:hover{opacity:.75}
+.act-row:last-child{border-bottom:none}
+.act-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act-ico svg{width:16px;height:16px;fill:none;stroke-width:1.8}
+.ai-b{background:var(--blue-light)}.ai-b svg{stroke:var(--blue)}
+.ai-g{background:var(--green-light)}.ai-g svg{stroke:var(--green)}
+.ai-o{background:var(--orange-light)}.ai-o svg{stroke:#854F0B}
+.ai-r{background:var(--red-light)}.ai-r svg{stroke:var(--red)}
+.act-body{flex:1}
+.a-title{font-size:12px;font-weight:500;color:var(--text)}
+.a-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.a-time{font-size:10px;color:var(--muted);flex-shrink:0;padding-top:2px}
 
-    /* ═══ LOGIN ═══ */
-    .login-wrap {
-      flex: 1;
-      background: var(--navy);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 0 28px 24px;
-    }
-    .login-icon {
-      width: 76px; height: 76px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 20px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 18px;
-    }
-    .login-icon svg { width: 44px; height: 44px; stroke: var(--orange); fill: none; stroke-width: 1.4; }
-    .login-title { color: #fff; font-size: 22px; font-weight: 700; text-align: center; }
-    .login-sub { color: rgba(255,255,255,0.5); font-size: 13px; text-align: center; margin: 6px 0 30px; }
-    .login-form { width: 100%; display: flex; flex-direction: column; gap: 14px; }
-    .field-lbl { color: rgba(255,255,255,0.65); font-size: 12px; margin-bottom: 5px; }
-    .login-field {
-      width: 100%;
-      background: rgba(255,255,255,0.1);
-      border: 0.5px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      padding: 12px 15px;
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .login-field::placeholder { color: rgba(255,255,255,0.3); }
-    .login-field:focus { border-color: var(--orange); }
-    .login-cta {
-      width: 100%;
-      background: var(--orange);
-      border: none;
-      border-radius: 10px;
-      padding: 14px;
-      color: var(--navy);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .login-cta:hover { opacity: 0.92; }
-    .login-cta:active { transform: scale(0.98); }
-    .login-forgot { color: rgba(255,255,255,0.4); font-size: 12px; text-align: center; cursor: pointer; }
-    .login-forgot:hover { color: var(--orange); }
+/* ─── FOTOS ─── */
+.upload-zone{border:1.5px dashed var(--border);border-radius:var(--r2);padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;background:var(--surface)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--orange);background:var(--orange-light)}
+.upload-zone svg{width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.4;margin-bottom:6px}
+.upload-zone p{font-size:12px;color:var(--muted)}
+.upload-zone strong{color:var(--orange)}
+#file-input{display:none}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.photo-card{background:var(--card);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;position:relative;transition:transform .15s,box-shadow .15s}
+.photo-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.photo-thumb{height:90px;background:var(--surface);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb svg{width:32px;height:32px;fill:none;stroke-width:1.2;opacity:.4}
+.photo-badge{position:absolute;top:6px;right:6px;background:var(--navy);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
+.photo-del{position:absolute;top:6px;left:6px;background:rgba(163,45,45,.85);color:#fff;border:none;border-radius:4px;width:22px;height:22px;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.photo-card:hover .photo-del{display:flex}
+.pm{padding:8px 9px 9px}
+.pm-t{font-size:11px;font-weight:500;color:var(--text)}
+.pm-d{font-size:10px;color:var(--muted);margin-top:1px}
 
-    /* ═══ DASHBOARD ═══ */
-    .dash-head {
-      background: var(--navy);
-      padding: 0 16px 16px;
-      flex-shrink: 0;
-    }
-    .dash-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .dash-greet { color: rgba(255,255,255,0.6); font-size: 12px; }
-    .dash-name { color: #fff; font-size: 17px; font-weight: 600; margin: 3px 0 12px; }
-    .msg-btn {
-      width: 38px; height: 38px;
-      background: rgba(255,255,255,0.12);
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-    }
-    .msg-btn:hover { background: rgba(255,255,255,0.22); }
-    .msg-btn svg { stroke: #fff; width: 18px; height: 18px; fill: none; stroke-width: 1.8; }
+/* ─── CRONOGRAMA ─── */
+.fase{margin-bottom:9px}
+.fase-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:.5px solid var(--border);border-radius:var(--r);cursor:pointer;background:var(--card);transition:background .15s}
+.fase-hdr:hover{background:var(--surface)}
+.fhl{display:flex;align-items:center;gap:8px}
+.fdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fn{font-size:12px;font-weight:500;color:var(--text)}
+.fw{font-size:10px;color:var(--muted);margin-top:1px}
+.bd{background:var(--green-light);color:var(--green);border-radius:5px;padding:2px 8px;font-size:10px;font-weight:600}
+.ba{background:var(--orange-light);color:#854F0B;border-radius:5px;padding:2px 8px;font-size:10px;font-weight:600}
+.bp{background:var(--surface);color:var(--muted);border-radius:5px;padding:2px 8px;font-size:10px;font-weight:600}
+.fase-body{display:none;padding:4px 12px 10px 28px;border:.5px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--surface)}
+.fase-body.open{display:block}
+.task{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);font-size:12px;cursor:pointer}
+.task:last-child{border-bottom:none}
+.task:hover .chk{border-color:var(--navy)}
+.chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chk.done{background:var(--green);border-color:var(--green)}
+.chk.done::after{content:'';width:7px;height:4px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translate(1px,-1px);display:block}
+.task-txt{color:var(--text);flex:1}
+.task-txt.done{color:var(--muted);text-decoration:line-through}
 
-    .progress-card {
-      background: rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 14px;
-    }
-    .prog-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .prog-top span { color: rgba(255,255,255,0.8); font-size: 12px; }
-    .prog-pct { color: var(--orange); font-size: 20px; font-weight: 700; }
-    .prog-track { background: rgba(255,255,255,0.2); border-radius: 4px; height: 7px; overflow: hidden; }
-    .prog-fill { background: var(--orange); height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
-    .prog-phases { display: flex; justify-content: space-between; margin-top: 7px; }
-    .prog-phases span { color: rgba(255,255,255,0.45); font-size: 10px; }
+/* ─── MATERIALES ─── */
+.mat-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.mat-row:last-child{border-bottom:none}
+.mat-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mat-ico svg{width:18px;height:18px;fill:none;stroke-width:1.8}
+.mat-info{flex:1;cursor:pointer}
+.mat-name{font-size:12px;font-weight:500;color:var(--text)}
+.mat-qty{font-size:10px;color:var(--muted);margin-top:1px}
+.mat-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.mat-pct{font-size:11px;font-weight:600}
+.mbar{width:56px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.mfill{height:100%;border-radius:2px;transition:width .6s ease}
+.ok .mat-pct{color:var(--green)}.ok .mfill{background:var(--green)}
+.warn .mat-pct{color:#854F0B}.warn .mfill{background:var(--orange)}
+.low .mat-pct{color:var(--red)}.low .mfill{background:var(--red)}
+.alert-box{margin-top:12px;background:var(--red-light);border:.5px solid #F09595;border-radius:var(--r);padding:12px}
+.al-t{font-size:11px;font-weight:600;color:var(--red);margin-bottom:3px}
+.al-d{font-size:11px;color:var(--red);line-height:1.5}
 
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-    .stat-card {
-      background: var(--surface);
-      border-radius: var(--radius-md);
-      padding: 13px;
-    }
-    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-    .stat-val { font-size: 24px; font-weight: 700; }
-    .stat-hint { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-    .c-orange { color: var(--orange); }
-    .c-green  { color: var(--green); }
-    .c-blue   { color: var(--blue); }
-    .c-red    { color: var(--red); }
+/* ─── MENSAJES ─── */
+.msg-hdr{background:var(--surface);border-bottom:.5px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--blue);flex-shrink:0}
+.sv-name{font-size:12px;font-weight:600;color:var(--text)}
+.sv-role{font-size:10px;color:var(--muted)}
+.odot{width:8px;height:8px;background:var(--green);border-radius:50%;margin-left:auto;flex-shrink:0}
+.msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msgs::-webkit-scrollbar{width:0}
+.bw{max-width:80%;display:flex;flex-direction:column;gap:2px}
+.bw.them{align-self:flex-start}.bw.me{align-self:flex-end}
+.bub{padding:9px 12px;font-size:12px;line-height:1.5;border-radius:13px}
+.them .bub{background:var(--surface);color:var(--text);border-radius:3px 13px 13px 13px}
+.me .bub{background:var(--navy);color:#fff;border-radius:13px 3px 13px 13px}
+.bt{font-size:9px;color:var(--muted)}.me .bt{text-align:right}
+.minput-area{padding:10px 12px;border-top:.5px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--card)}
+.minput{flex:1;background:var(--surface);border:.5px solid var(--border);border-radius:20px;padding:9px 13px;font-size:12px;color:var(--text);outline:none;transition:border-color .2s;font-family:inherit}
+.minput:focus{border-color:var(--navy)}
+.send-btn{width:36px;height:36px;border-radius:50%;background:var(--navy);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.send-btn:hover{background:var(--blue)}
+.send-btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2}
 
-    .act-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 11px 0;
-      border-bottom: 0.5px solid var(--border);
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .act-item:hover { opacity: 0.75; }
-    .act-item:last-child { border-bottom: none; }
-    .act-ico {
-      width: 34px; height: 34px;
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .act-ico svg { width: 17px; height: 17px; fill: none; stroke-width: 1.8; }
-    .act-ico.blue  { background: var(--blue-light); }  .act-ico.blue svg  { stroke: var(--blue); }
-    .act-ico.green { background: var(--green-light); } .act-ico.green svg { stroke: var(--green); }
-    .act-ico.orng  { background: var(--orange-light);} .act-ico.orng svg  { stroke: #854F0B; }
-    .act-ico.red   { background: var(--red-light); }   .act-ico.red svg   { stroke: var(--red); }
-    .act-body { flex: 1; }
-    .act-title { font-size: 13px; font-weight: 500; color: var(--text); }
-    .act-desc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .act-time  { font-size: 10px; color: var(--text-muted); flex-shrink: 0; padding-top: 3px; }
+/* ─── ADMIN PANEL ─── */
+.admin-section{background:var(--surface);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.admin-section-title{padding:11px 13px;font-size:12px;font-weight:600;color:var(--text);border-bottom:.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.admin-row{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:.5px solid var(--border)}
+.admin-row:last-child{border-bottom:none}
+.admin-row-info{flex:1}
+.admin-row-name{font-size:12px;font-weight:500;color:var(--text)}
+.admin-row-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.btn-sm{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;transition:opacity .15s}
+.btn-sm:hover{opacity:.85}
+.btn-sm.red{background:var(--red)}
+.btn-sm.orange{background:var(--orange);color:var(--navy)}
+.notif-list{padding:0 13px}
+.notif-item{padding:9px 0;border-bottom:.5px solid var(--border);display:flex;align-items:flex-start;gap:8px}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.notif-text{font-size:12px;color:var(--text);flex:1}
+.notif-time{font-size:10px;color:var(--muted);flex-shrink:0}
 
-    /* ═══ FOTOS ═══ */
-    .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .photo-card {
-      background: var(--card);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .photo-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
-    .photo-thumb {
-      height: 96px;
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-    .photo-thumb svg { width: 36px; height: 36px; fill: none; stroke-width: 1.2; opacity: 0.5; }
-    .photo-new {
-      position: absolute; top: 7px; right: 7px;
-      background: var(--navy); color: #fff;
-      font-size: 9px; font-weight: 700;
-      padding: 2px 7px; border-radius: 5px;
-    }
-    .photo-meta { padding: 9px 10px 10px; }
-    .photo-meta .pm-t { font-size: 12px; font-weight: 500; color: var(--text); }
-    .photo-meta .pm-d { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-    .ph-blue   { background: #ddeeff; } .ph-blue svg   { stroke: var(--blue); }
-    .ph-green  { background: #ddf0dd; } .ph-green svg  { stroke: var(--green); }
-    .ph-amber  { background: #fdefd0; } .ph-amber svg  { stroke: #854F0B; }
-    .ph-red    { background: #fde0e0; } .ph-red svg    { stroke: var(--red); }
-    .ph-purple { background: #eeeef8; } .ph-purple svg { stroke: var(--purple); }
-
-    /* ═══ CRONOGRAMA ═══ */
-    .fase { margin-bottom: 10px; }
-    .fase-hdr {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 11px 13px;
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      background: var(--card);
-      transition: background 0.15s;
-    }
-    .fase-hdr:hover { background: var(--surface); }
-    .fase-hdr-l { display: flex; align-items: center; gap: 9px; }
-    .fase-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .fase-name { font-size: 13px; font-weight: 500; color: var(--text); }
-    .fase-weeks { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-    .badge-done    { background: var(--green-light);  color: var(--green); border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
-    .badge-active  { background: var(--orange-light); color: #854F0B;      border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
-    .badge-pending { background: var(--surface);      color: var(--text-muted); border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
-    .fase-tasks {
-      display: none;
-      padding: 4px 13px 11px 32px;
-      border: 0.5px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 var(--radius-md) var(--radius-md);
-      background: var(--surface);
-    }
-    .fase-tasks.open { display: block; }
-    .task-row {
-      display: flex; align-items: center; gap: 9px;
-      padding: 7px 0;
-      border-bottom: 0.5px solid var(--border);
-      font-size: 12px;
-    }
-    .task-row:last-child { border-bottom: none; }
-    .chk {
-      width: 17px; height: 17px;
-      border-radius: 5px;
-      border: 1.5px solid var(--border);
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .chk.done { background: var(--green); border-color: var(--green); }
-    .chk.done::after { content: ''; width: 8px; height: 5px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); display: block; }
-    .task-txt { color: var(--text); }
-    .task-txt.done { color: var(--text-muted); text-decoration: line-through; }
-
-    /* ═══ MATERIALES ═══ */
-    .mat-row {
-      display: flex; align-items: center; gap: 11px;
-      padding: 11px 0;
-      border-bottom: 0.5px solid var(--border);
-    }
-    .mat-row:last-child { border-bottom: none; }
-    .mat-ico {
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .mat-ico svg { width: 19px; height: 19px; fill: none; stroke-width: 1.8; }
-    .mat-info { flex: 1; }
-    .mat-name { font-size: 13px; font-weight: 500; color: var(--text); }
-    .mat-qty  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .mat-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-    .mat-pct { font-size: 12px; font-weight: 600; }
-    .mini-bar { width: 64px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .mini-fill { height: 100%; border-radius: 3px; }
-    .status-ok   .mat-pct { color: var(--green); }  .status-ok .mini-fill   { background: var(--green); }
-    .status-warn .mat-pct { color: #854F0B; }        .status-warn .mini-fill { background: var(--orange); }
-    .status-low  .mat-pct { color: var(--red); }     .status-low .mini-fill  { background: var(--red); }
-    .alert-box {
-      margin-top: 14px;
-      background: var(--red-light);
-      border: 0.5px solid #F09595;
-      border-radius: var(--radius-md);
-      padding: 13px;
-    }
-    .alert-title { font-size: 12px; font-weight: 600; color: var(--red); margin-bottom: 4px; }
-    .alert-desc  { font-size: 12px; color: var(--red); line-height: 1.5; }
-
-    /* ═══ MENSAJES ═══ */
-    .msg-head {
-      background: var(--surface);
-      border-bottom: 0.5px solid var(--border);
-      padding: 12px 16px;
-      display: flex; align-items: center; gap: 11px;
-      flex-shrink: 0;
-    }
-    .avatar {
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: var(--blue-light);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 600;
-      color: var(--blue);
-      flex-shrink: 0;
-    }
-    .sv-name { font-size: 13px; font-weight: 600; color: var(--text); }
-    .sv-role { font-size: 11px; color: var(--text-muted); }
-    .online-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; margin-left: auto; flex-shrink: 0; }
-
-    .msgs-area { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
-    .msgs-area::-webkit-scrollbar { width: 0; }
-    .bubble-wrap { max-width: 80%; display: flex; flex-direction: column; gap: 3px; }
-    .bubble-wrap.them { align-self: flex-start; }
-    .bubble-wrap.me   { align-self: flex-end; }
-    .bubble {
-      padding: 10px 13px;
-      font-size: 13px;
-      line-height: 1.5;
-      border-radius: 14px;
-    }
-    .them .bubble {
-      background: var(--surface);
-      color: var(--text);
-      border-radius: 4px 14px 14px 14px;
-    }
-    .me .bubble {
-      background: var(--navy);
-      color: #fff;
-      border-radius: 14px 4px 14px 14px;
-    }
-    .btime { font-size: 10px; color: var(--text-muted); }
-    .me .btime { text-align: right; }
-
-    .input-area {
-      padding: 11px 14px;
-      border-top: 0.5px solid var(--border);
-      display: flex; align-items: center; gap: 9px;
-      flex-shrink: 0;
-      background: var(--card);
-    }
-    .msg-inp {
-      flex: 1;
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: 22px;
-      padding: 10px 15px;
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .msg-inp:focus { border-color: var(--navy); }
-    .send-btn {
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      background: var(--navy);
-      border: none;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
-      flex-shrink: 0;
-    }
-    .send-btn:hover { background: var(--blue); }
-    .send-btn svg { width: 17px; height: 17px; stroke: #fff; fill: none; stroke-width: 2; }
-
-    /* ── Responsive: on mobile, remove phone frame ── */
-    @media (max-width: 480px) {
-      body { padding: 0; background: var(--bg); justify-content: flex-start; }
-      .desktop-hint { display: none; }
-      .phone-outer { border-radius: 0; padding: 0; max-width: 100%; box-shadow: none; background: transparent; }
-      .phone-inner { border-radius: 0; height: 100dvh; }
-      .phone-notch { display: none; }
-      .status-bar { padding: 12px 16px 8px; }
-    }
-  </style>
+@media(max-width:480px){
+  body{padding:0}
+  .frame-label{display:none}
+  .phone-wrap{border-radius:0;padding:0;max-width:100%;box-shadow:none;background:transparent}
+  .phone{border-radius:0;height:100dvh}
+  .notch{display:none}
+  .sbar{padding:10px 16px 7px}
+}
+</style>
 </head>
 <body>
 
-<div class="desktop-hint">
-  <div class="brand">
-    <div class="brand-logo">
-      <svg viewBox="0 0 24 24"><polygon points="12,3 22,10 22,21 2,21 2,10"/><rect x="9" y="14" width="6" height="7" rx="1"/><rect x="5" y="10" width="5" height="5" rx="1"/><rect x="14" y="10" width="5" height="5" rx="1"/></svg>
+<div class="frame-label">
+  <div class="brand-row">
+    <div class="brand-ico"><svg viewBox="0 0 24 24"><polygon points="12,3 22,10 22,21 2,21 2,10"/><rect x="9" y="14" width="6" height="7" rx="1"/><rect x="5" y="10" width="5" height="5" rx="1"/><rect x="14" y="10" width="5" height="5" rx="1"/></svg></div>
+    <div><div class="brand-name">Unión Constructiva GT</div><div class="brand-sub">Plataforma de seguimiento digital</div></div>
+  </div>
+</div>
+
+<div class="phone-wrap">
+<div class="phone">
+<div class="notch"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-ico"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+  <div class="toast-body"><div class="t-title" id="toast-title">Notificación</div><div class="t-sub" id="toast-sub">Mensaje</div></div>
+</div>
+
+<!-- ════════ LOGIN ════════ -->
+<div class="screen on" id="s-login">
+  <div class="sbar" style="padding-top:40px"><span id="clock">9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div><svg width="14" height="10" fill="none" stroke="#fff" stroke-width="1.3" viewBox="0 0 14 10"><rect x=".5" y="1" width="10" height="7.5" rx="1.5"/><path d="M11 3.5h1.5a1 1 0 0 1 1 1v1.5a1 1 0 0 1-1 1H11"/><rect x="1.5" y="2" width="8" height="5.5" rx=".8" fill="#fff"/></svg></div></div>
+  <div class="login-bg">
+    <div class="l-ico"><svg viewBox="0 0 44 44"><polygon points="22,4 40,16 40,38 4,38 4,16"/><rect x="16" y="25" width="12" height="13" rx="2"/><rect x="8" y="16" width="10" height="10" rx="1.5"/><rect x="26" y="16" width="10" height="10" rx="1.5"/><circle cx="36" cy="10" r="6" fill="none" stroke="#4A9EF5" stroke-width="1.4"/><line x1="33" y1="8" x2="39" y2="8" stroke="#4A9EF5" stroke-width="1.2"/><line x1="33" y1="10" x2="39" y2="10" stroke="#4A9EF5" stroke-width="1.2"/><line x1="33" y1="12" x2="39" y2="12" stroke="#4A9EF5" stroke-width="1.2"/></svg></div>
+    <div class="l-title">Unión Constructiva GT</div>
+    <div class="l-sub">Seguimiento digital de tu proyecto</div>
+    <div class="lform">
+      <div><div class="lbl">Correo electrónico</div><input class="linput" id="l-email" type="email" placeholder="correo@ejemplo.com"></div>
+      <div><div class="lbl">Contraseña</div><input class="linput" id="l-pass" type="password" placeholder="••••••••"></div>
+      <button class="lcta" onclick="doLogin()">Ingresar al proyecto</button>
+      <div class="l-link" onclick="go('admin')">⚙ Acceso administrador</div>
     </div>
-    <div>
-      <div class="brand-name">Unión Constructiva GT</div>
-      <div class="brand-sub">Plataforma de seguimiento digital</div>
+    <div class="user-list">
+      <div class="user-list-title">Acceso rápido (demo)</div>
+      <div class="user-chips-wrap" id="user-chips"></div>
     </div>
   </div>
 </div>
 
-<div class="phone-outer">
-  <div class="phone-inner">
-    <div class="phone-notch"></div>
-
-    <!-- ═══════════ LOGIN ═══════════ -->
-    <div class="screen active" id="s-login">
-      <div class="status-bar" style="padding-top:44px">
-        <span>9:41</span>
-        <div class="status-icons">
-          <div class="signal"><span></span><span></span><span></span><span></span></div>
-          <svg width="15" height="11" fill="none" stroke="#fff" stroke-width="1.3" viewBox="0 0 15 11"><rect x="0.5" y="1" width="11" height="8" rx="1.5"/><path d="M12 3.5h1.5a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H12"/><rect x="1.5" y="2" width="8.5" height="6" rx="0.8" fill="#fff"/></svg>
-        </div>
+<!-- ════════ DASHBOARD ════════ -->
+<div class="screen" id="s-dashboard">
+  <div class="sbar" style="padding-top:40px"><span id="clock2">9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="dash-head">
+    <div class="dash-top">
+      <div>
+        <div class="d-greet">Bienvenido,</div>
+        <div class="d-name" id="d-name" onclick="openModal('modal-editname')">Julio Pocón <span class="edit-ico">✎</span></div>
       </div>
-      <div class="login-wrap">
-        <div class="login-icon">
-          <svg viewBox="0 0 44 44">
-            <polygon points="22,4 40,16 40,38 4,38 4,16"/>
-            <rect x="16" y="25" width="12" height="13" rx="2"/>
-            <rect x="8" y="16" width="10" height="10" rx="1.5"/>
-            <rect x="26" y="16" width="10" height="10" rx="1.5"/>
-            <circle cx="36" cy="10" r="6" fill="none" stroke="#4A9EF5" stroke-width="1.4"/>
-            <line x1="33" y1="8" x2="39" y2="8" stroke="#4A9EF5" stroke-width="1.2"/>
-            <line x1="33" y1="10" x2="39" y2="10" stroke="#4A9EF5" stroke-width="1.2"/>
-            <line x1="33" y1="12" x2="39" y2="12" stroke="#4A9EF5" stroke-width="1.2"/>
-          </svg>
-        </div>
-        <div class="login-title">Unión Constructiva GT</div>
-        <div class="login-sub">Seguimiento digital de tu proyecto</div>
-        <div class="login-form">
-          <div>
-            <div class="field-lbl">Correo electrónico</div>
-            <input class="login-field" type="email" placeholder="tu@correo.com" value="cliente@ejemplo.com">
-          </div>
-          <div>
-            <div class="field-lbl">Contraseña</div>
-            <input class="login-field" type="password" value="12345678">
-          </div>
-          <button class="login-cta" onclick="goTo('dashboard')">Ingresar al proyecto</button>
-          <div class="login-forgot">¿Olvidaste tu contraseña?</div>
-        </div>
+      <div style="display:flex;gap:7px">
+        <button class="icon-btn" onclick="triggerNotif()" title="Simular notificación"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        <button class="icon-btn" onclick="go('mensajes')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
       </div>
     </div>
+    <div class="prog-card" onclick="openModal('modal-progress')">
+      <div class="prog-top"><span>Avance general del proyecto</span><span class="prog-pct" id="prog-pct-display">65%</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+      <div class="prog-phases"><span>Planif.✓</span><span>Obra✓</span><span>Acabados</span><span>Entrega</span></div>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="slbl">Resumen</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="s-lbl">Días transcurridos</div><div class="s-val co" id="stat-dias">47</div><div class="s-hint">de ~120 estimados</div></div>
+      <div class="stat-card"><div class="s-lbl">Tareas completadas</div><div class="s-val cg" id="stat-tareas">18</div><div class="s-hint" id="stat-tareas-hint">de 29 planificadas</div></div>
+      <div class="stat-card"><div class="s-lbl">Fotos del avance</div><div class="s-val cb" id="stat-fotos">0</div><div class="s-hint">última: hoy</div></div>
+      <div class="stat-card"><div class="s-lbl">Alertas activas</div><div class="s-val cr" id="stat-alertas">1</div><div class="s-hint">cemento bajo</div></div>
+    </div>
+    <div class="slbl">Actividad reciente</div>
+    <div id="activity-feed">
+      <div class="act-row" onclick="go('fotos')"><div class="act-ico ai-b"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg></div><div class="act-body"><div class="a-title">Sistema listo para subir fotos</div><div class="a-desc">Toca Fotos para agregar imágenes reales</div></div><div class="a-time">Ahora</div></div>
+      <div class="act-row" onclick="go('materiales')"><div class="act-ico ai-r"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="act-body"><div class="a-title">Alerta: cemento al 15%</div><div class="a-desc">Materiales · reposición requerida</div></div><div class="a-time">Ayer</div></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="nb on" onclick="go('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nd"></div></button>
+    <button class="nb" onclick="go('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nd"></div></button>
+    <button class="nb" onclick="go('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nd"></div></button>
+    <button class="nb" onclick="go('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nd"></div></button>
+    <button class="nb" onclick="go('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nd"></div></button>
+  </div>
+</div>
 
-    <!-- ═══════════ DASHBOARD ═══════════ -->
-    <div class="screen" id="s-dashboard">
-      <div class="status-bar" style="padding-top:44px">
-        <span>9:41</span>
-        <div class="status-icons">
-          <div class="signal"><span></span><span></span><span></span><span></span></div>
-          <svg width="15" height="11" fill="none" stroke="#fff" stroke-width="1.3" viewBox="0 0 15 11"><rect x="0.5" y="1" width="11" height="8" rx="1.5"/><path d="M12 3.5h1.5a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H12"/><rect x="1.5" y="2" width="8.5" height="6" rx="0.8" fill="#fff"/></svg>
-        </div>
-      </div>
-      <div class="dash-head">
-        <div class="dash-top">
-          <div>
-            <div class="dash-greet">Bienvenido,</div>
-            <div class="dash-name">Julio Pocón</div>
-          </div>
-          <button class="msg-btn" onclick="goTo('mensajes')">
-            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </button>
-        </div>
-        <div class="progress-card">
-          <div class="prog-top">
-            <span>Avance general del proyecto</span>
-            <span class="prog-pct">62%</span>
-          </div>
-          <div class="prog-track"><div class="prog-fill" id="main-bar" style="width:0%"></div></div>
-          <div class="prog-phases">
-            <span>Planif. ✓</span><span>Obra ✓</span><span>Acabados</span><span>Entrega</span>
-          </div>
-        </div>
-      </div>
-      <div class="scroll">
-        <div class="sec-label">Resumen</div>
-        <div class="stat-grid">
-          <div class="stat-card"><div class="stat-lbl">Días transcurridos</div><div class="stat-val c-orange">47</div><div class="stat-hint">de ~120 estimados</div></div>
-          <div class="stat-card"><div class="stat-lbl">Tareas completadas</div><div class="stat-val c-green">18</div><div class="stat-hint">de 29 planificadas</div></div>
-          <div class="stat-card"><div class="stat-lbl">Fotos del avance</div><div class="stat-val c-blue">34</div><div class="stat-hint">última: hoy</div></div>
-          <div class="stat-card"><div class="stat-lbl">Alertas activas</div><div class="stat-val c-red">1</div><div class="stat-hint">cemento bajo</div></div>
-        </div>
-        <div class="sec-label">Actividad reciente</div>
-        <div class="act-item" onclick="goTo('fotos')">
-          <div class="act-ico blue"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/><path d="M3 9h2"/></svg></div>
-          <div class="act-body"><div class="act-title">12 fotos nuevas — Instalación eléctrica</div><div class="act-desc">Fase 4 · Instalaciones</div></div>
-          <div class="act-time">Hoy</div>
-        </div>
-        <div class="act-item" onclick="goTo('cronograma')">
-          <div class="act-ico green"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg></div>
-          <div class="act-body"><div class="act-title">Reporte semanal publicado</div><div class="act-desc">Semana 7 · Arq. García</div></div>
-          <div class="act-time">Ayer</div>
-        </div>
-        <div class="act-item" onclick="goTo('materiales')">
-          <div class="act-ico red"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <div class="act-body"><div class="act-title">Alerta: cemento al 15%</div><div class="act-desc">Materiales · reposición requerida</div></div>
-          <div class="act-time">Ayer</div>
-        </div>
-        <div class="act-item" onclick="goTo('materiales')">
-          <div class="act-ico orng"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
-          <div class="act-body"><div class="act-title">Entrega de materiales registrada</div><div class="act-desc">Block 15×20, 400 unidades</div></div>
-          <div class="act-time">Lun</div>
-        </div>
-      </div>
-      <div class="bottom-nav">
-        <button class="nav-btn active" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+<!-- ════════ FOTOS ════════ -->
+<div class="screen" id="s-fotos">
+  <div class="sbar" style="padding-top:40px"><span>9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="tnav">
+    <div class="tnav-row"><button class="back" onclick="go('dashboard')">← Inicio</button><span class="badge badge-o" id="foto-count-badge">0 fotos</span></div>
+    <h2>Historial fotográfico</h2><div class="sub" id="foto-project-name">Proyecto Vivienda · 6×15m</div>
+  </div>
+  <div class="sc">
+    <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="this.classList.add('drag');event.preventDefault()" ondragleave="this.classList.remove('drag')" ondrop="this.classList.remove('drag');handleFiles(event.dataTransfer.files);event.preventDefault()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p><strong>Toca aquí para subir fotos</strong><br>o arrastra imágenes desde tu PC</p>
+    </div>
+    <div class="slbl">Fotos agregadas</div>
+    <div class="photo-grid" id="photo-grid">
+      <div style="grid-column:span 2;text-align:center;padding:20px;color:var(--muted);font-size:12px">Aún no has subido fotos. ¡Toca arriba para agregar!</div>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nd"></div></button>
+    <button class="nb on" onclick="go('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nd"></div></button>
+    <button class="nb" onclick="go('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nd"></div></button>
+    <button class="nb" onclick="go('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nd"></div></button>
+    <button class="nb" onclick="go('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nd"></div></button>
+  </div>
+</div>
+
+<!-- ════════ CRONOGRAMA ════════ -->
+<div class="screen" id="s-cronograma">
+  <div class="sbar" style="padding-top:40px"><span>9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="tnav">
+    <div class="tnav-row"><button class="back" onclick="go('dashboard')">← Inicio</button><span class="badge badge-o" id="week-badge">Sem. 7 de 17</span></div>
+    <h2>Cronograma de obra</h2><div class="sub">Toca cada fase · marca tareas completadas</div>
+  </div>
+  <div class="sc" id="cron-scroll"></div>
+  <div class="bnav">
+    <button class="nb" onclick="go('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nd"></div></button>
+    <button class="nb" onclick="go('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nd"></div></button>
+    <button class="nb on" onclick="go('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nd"></div></button>
+    <button class="nb" onclick="go('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nd"></div></button>
+    <button class="nb" onclick="go('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nd"></div></button>
+  </div>
+</div>
+
+<!-- ════════ MATERIALES ════════ -->
+<div class="screen" id="s-materiales">
+  <div class="sbar" style="padding-top:40px"><span>9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="tnav">
+    <div class="tnav-row"><button class="back" onclick="go('dashboard')">← Inicio</button><span class="badge badge-r" id="alert-badge">1 alerta</span></div>
+    <h2>Control de materiales</h2><div class="sub">Toca un material para editar</div>
+  </div>
+  <div class="sc">
+    <div class="slbl">Inventario</div>
+    <div id="mat-list"></div>
+    <button class="btn-secondary" onclick="openModal('modal-addmat')" style="margin-top:12px">+ Agregar material</button>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nd"></div></button>
+    <button class="nb" onclick="go('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nd"></div></button>
+    <button class="nb" onclick="go('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nd"></div></button>
+    <button class="nb on" onclick="go('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nd"></div></button>
+    <button class="nb" onclick="go('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nd"></div></button>
+  </div>
+</div>
+
+<!-- ════════ MENSAJES ════════ -->
+<div class="screen" id="s-mensajes">
+  <div class="sbar" style="padding-top:40px"><span>9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="msg-hdr">
+    <div class="avatar" id="sup-avatar">AG</div>
+    <div><div class="sv-name" id="sup-name">Arq. Ana García</div><div class="sv-role">Supervisora · Unión Constructiva GT</div></div>
+    <div class="odot"></div>
+  </div>
+  <div class="msgs" id="msgs-area">
+    <div class="bw them"><div class="bub">Buenos días. Le confirmo que hoy iniciamos con el cableado eléctrico de sala y comedor.</div><div class="bt">Lun 9:10</div></div>
+    <div class="bw me"><div class="bub">Gracias, ¿cuándo subirán las fotos al sistema?</div><div class="bt">Lun 9:32</div></div>
+    <div class="bw them"><div class="bub">Las fotos ya están disponibles. El avance general llegó al 65%.</div><div class="bt">Hoy 14:45</div></div>
+  </div>
+  <div class="minput-area">
+    <input class="minput" id="msg-inp" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg></button>
+  </div>
+  <div class="bnav">
+    <button class="nb" onclick="go('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nd"></div></button>
+    <button class="nb" onclick="go('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nd"></div></button>
+    <button class="nb" onclick="go('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nd"></div></button>
+    <button class="nb" onclick="go('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nd"></div></button>
+    <button class="nb on" onclick="go('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nd"></div></button>
+  </div>
+</div>
+
+<!-- ════════ ADMIN ════════ -->
+<div class="screen" id="s-admin">
+  <div class="sbar" style="padding-top:40px"><span>9:41</span><div style="display:flex;gap:5px;align-items:center"><div class="sig"><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="tnav">
+    <div class="tnav-row"><button class="back" onclick="go('login')">← Salir</button><span class="badge badge-o">Admin</span></div>
+    <h2>Panel de administración</h2><div class="sub">Gestiona clientes y configuración</div>
+  </div>
+  <div class="sc">
+    <!-- Clientes -->
+    <div class="admin-section">
+      <div class="admin-section-title">Clientes registrados <button class="btn-sm orange" onclick="openModal('modal-adduser')">+ Nuevo</button></div>
+      <div id="user-admin-list"></div>
+    </div>
+    <!-- Supervisor -->
+    <div class="admin-section">
+      <div class="admin-section-title">Supervisor asignado</div>
+      <div style="padding:13px">
+        <div class="field-group"><label>Nombre del supervisor</label><input id="sup-name-input" type="text" placeholder="Nombre completo"></div>
+        <div class="field-group"><label>Iniciales (para avatar)</label><input id="sup-initials-input" type="text" placeholder="Ej: AG" maxlength="2"></div>
+        <button class="btn-primary" onclick="saveSupervisor()" style="margin-top:0">Guardar supervisor</button>
       </div>
     </div>
-
-    <!-- ═══════════ FOTOS ═══════════ -->
-    <div class="screen" id="s-fotos">
-      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
-      <div class="topnav">
-        <div class="topnav-row"><button class="back-btn" onclick="goTo('dashboard')">← Inicio</button><span class="badge-orange">34 fotos</span></div>
-        <h2>Historial fotográfico</h2><div class="topsub">Proyecto Vivienda Pocón · 6×15m</div>
-      </div>
-      <div class="scroll">
-        <div class="sec-label">Esta semana</div>
-        <div class="photo-grid">
-          <div class="photo-card"><div class="photo-thumb ph-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M5 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2l-2-2H9L7 3z"/></svg><span class="photo-new">HOY</span></div><div class="photo-meta"><div class="pm-t">Cableado zona sala</div><div class="pm-d">7 mayo · 14:30</div></div></div>
-          <div class="photo-card"><div class="photo-thumb ph-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M5 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2l-2-2H9L7 3z"/></svg><span class="photo-new">HOY</span></div><div class="photo-meta"><div class="pm-t">Plomería cocina</div><div class="pm-d">7 mayo · 11:15</div></div></div>
-          <div class="photo-card"><div class="photo-thumb ph-amber"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="22" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg></div><div class="photo-meta"><div class="pm-t">Muros habitación 2</div><div class="pm-d">6 mayo</div></div></div>
-          <div class="photo-card"><div class="photo-thumb ph-green"><svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div><div class="photo-meta"><div class="pm-t">Columnas frontales</div><div class="pm-d">5 mayo</div></div></div>
-        </div>
-        <div class="sec-label" style="margin-top:16px">Semana anterior</div>
-        <div class="photo-grid">
-          <div class="photo-card"><div class="photo-thumb ph-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div><div class="photo-meta"><div class="pm-t">Losa entrepiso</div><div class="pm-d">30 abril</div></div></div>
-          <div class="photo-card"><div class="photo-thumb ph-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div><div class="photo-meta"><div class="pm-t">Cimentación completa</div><div class="pm-d">28 abril</div></div></div>
-          <div class="photo-card"><div class="photo-thumb ph-purple"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div><div class="photo-meta"><div class="pm-t">Vista general obra</div><div class="pm-d">25 abril</div></div></div>
-          <div class="photo-card"><div class="photo-thumb ph-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M5 3H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2l-2-2H9L7 3z"/></svg></div><div class="photo-meta"><div class="pm-t">Acero de refuerzo</div><div class="pm-d">23 abril</div></div></div>
-        </div>
-      </div>
-      <div class="bottom-nav">
-        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
-        <button class="nav-btn active" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+    <!-- Notificaciones -->
+    <div class="admin-section">
+      <div class="admin-section-title">Disparar notificación</div>
+      <div style="padding:13px">
+        <div class="field-group"><label>Título</label><input id="notif-title-inp" type="text" placeholder="Ej: Nuevo reporte disponible" value="Nuevo reporte disponible"></div>
+        <div class="field-group"><label>Mensaje</label><input id="notif-msg-inp" type="text" placeholder="Descripción breve" value="Semana 8 publicada por Arq. García"></div>
+        <button class="btn-primary" onclick="fireNotif()" style="margin-top:0">🔔 Enviar notificación</button>
       </div>
     </div>
-
-    <!-- ═══════════ CRONOGRAMA ═══════════ -->
-    <div class="screen" id="s-cronograma">
-      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
-      <div class="topnav">
-        <div class="topnav-row"><button class="back-btn" onclick="goTo('dashboard')">← Inicio</button><span class="badge-orange">Sem. 7 de 17</span></div>
-        <h2>Cronograma de obra</h2><div class="topsub">Toca cada fase para ver tareas</div>
-      </div>
-      <div class="scroll">
-        <div class="fase">
-          <div class="fase-hdr" onclick="toggleFase('f1')"><div class="fase-hdr-l"><div class="fase-dot" style="background:var(--green)"></div><div><div class="fase-name">Fase 1 — Planificación</div><div class="fase-weeks">Semanas 1–2</div></div></div><span class="badge-done">Completada</span></div>
-          <div class="fase-tasks" id="f1">
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Reunión inicial con cliente</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Diseño preliminar y planos</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Elaboración de presupuesto</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Firma de contrato</span></div>
-          </div>
-        </div>
-        <div class="fase">
-          <div class="fase-hdr" onclick="toggleFase('f2')"><div class="fase-hdr-l"><div class="fase-dot" style="background:var(--green)"></div><div><div class="fase-name">Fase 2 — Trámites</div><div class="fase-weeks">Semanas 3–4</div></div></div><span class="badge-done">Completada</span></div>
-          <div class="fase-tasks" id="f2">
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Gestión permiso municipal</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Compra inicial de materiales</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Planificación logística</span></div>
-          </div>
-        </div>
-        <div class="fase">
-          <div class="fase-hdr" onclick="toggleFase('f3')"><div class="fase-hdr-l"><div class="fase-dot" style="background:var(--green)"></div><div><div class="fase-name">Fase 3 — Obra gruesa</div><div class="fase-weeks">Semanas 5–10</div></div></div><span class="badge-done">Completada</span></div>
-          <div class="fase-tasks" id="f3">
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Movimiento de tierra</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Cimentación</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Estructura y vigas</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Muros perimetrales</span></div>
-          </div>
-        </div>
-        <div class="fase">
-          <div class="fase-hdr" onclick="toggleFase('f4')"><div class="fase-hdr-l"><div class="fase-dot" style="background:#BA7517"></div><div><div class="fase-name">Fase 4 — Instalaciones</div><div class="fase-weeks">Semanas 11–16 · En progreso</div></div></div><span class="badge-active">En progreso</span></div>
-          <div class="fase-tasks open" id="f4">
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Instalación eléctrica principal</span></div>
-            <div class="task-row"><div class="chk done"></div><span class="task-txt done">Plomería principal</span></div>
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Cableado secundario habitaciones</span></div>
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Revestimientos y pisos</span></div>
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Pintura interior</span></div>
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Carpintería y puertas</span></div>
-          </div>
-        </div>
-        <div class="fase">
-          <div class="fase-hdr" onclick="toggleFase('f5')"><div class="fase-hdr-l"><div class="fase-dot" style="background:#ccc"></div><div><div class="fase-name">Fase 5 — Entrega</div><div class="fase-weeks">Semana 17</div></div></div><span class="badge-pending">Pendiente</span></div>
-          <div class="fase-tasks" id="f5">
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Inspección final</span></div>
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Correcciones menores</span></div>
-            <div class="task-row"><div class="chk"></div><span class="task-txt">Entrega formal al cliente</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="bottom-nav">
-        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
-        <button class="nav-btn active" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
+    <!-- Proyecto -->
+    <div class="admin-section">
+      <div class="admin-section-title">Datos del proyecto</div>
+      <div style="padding:13px">
+        <div class="field-group"><label>Nombre del proyecto</label><input id="proj-name-inp" type="text" placeholder="Ej: Vivienda Pocón · 6×15m"></div>
+        <div class="field-group"><label>Semana actual (de 17)</label><input id="proj-week-inp" type="number" min="1" max="17" placeholder="7"></div>
+        <button class="btn-primary" onclick="saveProject()" style="margin-top:0">Guardar proyecto</button>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- ═══════════ MATERIALES ═══════════ -->
-    <div class="screen" id="s-materiales">
-      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
-      <div class="topnav">
-        <div class="topnav-row"><button class="back-btn" onclick="goTo('dashboard')">← Inicio</button><span class="badge-red">1 alerta</span></div>
-        <h2>Control de materiales</h2><div class="topsub">Inventario actualizado al 7 mayo</div>
-      </div>
-      <div class="scroll">
-        <div class="sec-label">Estado de inventario</div>
-        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--blue-light)"><svg viewBox="0 0 24 24" stroke="var(--blue)"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20M2 15h20M12 3v18"/></svg></div><div class="mat-info"><div class="mat-name">Block 15×20 cm</div><div class="mat-qty">580 unidades · Entregadas: 800</div></div><div class="mat-right"><div class="mat-pct">73%</div><div class="mini-bar"><div class="mini-fill" style="width:73%"></div></div></div></div>
-        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--green-light)"><svg viewBox="0 0 24 24" stroke="var(--green)"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><div class="mat-info"><div class="mat-name">Hierro #3 (varillas)</div><div class="mat-qty">45 varillas · Entregadas: 60</div></div><div class="mat-right"><div class="mat-pct">75%</div><div class="mini-bar"><div class="mini-fill" style="width:75%"></div></div></div></div>
-        <div class="mat-row status-warn"><div class="mat-ico" style="background:var(--orange-light)"><svg viewBox="0 0 24 24" stroke="#854F0B"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></div><div class="mat-info"><div class="mat-name">Arena amarilla (m³)</div><div class="mat-qty">3.5 m³ restantes · Usados: 6.5</div></div><div class="mat-right"><div class="mat-pct">35%</div><div class="mini-bar"><div class="mini-fill" style="width:35%"></div></div></div></div>
-        <div class="mat-row status-low"><div class="mat-ico" style="background:var(--red-light)"><svg viewBox="0 0 24 24" stroke="var(--red)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="mat-info"><div class="mat-name">Cemento (sacos)</div><div class="mat-qty">8 sacos · Usados: 45 de 53</div></div><div class="mat-right"><div class="mat-pct">15%</div><div class="mini-bar"><div class="mini-fill" style="width:15%"></div></div></div></div>
-        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--purple-light)"><svg viewBox="0 0 24 24" stroke="var(--purple)"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div><div class="mat-info"><div class="mat-name">Cable eléctrico (mts)</div><div class="mat-qty">180 mts · Entregados: 250</div></div><div class="mat-right"><div class="mat-pct">72%</div><div class="mini-bar"><div class="mini-fill" style="width:72%;background:var(--purple)"></div></div></div></div>
-        <div class="mat-row status-ok"><div class="mat-ico" style="background:var(--green-light)"><svg viewBox="0 0 24 24" stroke="var(--green)"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div><div class="mat-info"><div class="mat-name">Tubo PVC 1/2" (und.)</div><div class="mat-qty">22 unidades restantes</div></div><div class="mat-right"><div class="mat-pct">55%</div><div class="mini-bar"><div class="mini-fill" style="width:55%"></div></div></div></div>
-        <div class="alert-box"><div class="alert-title">Acción requerida</div><div class="alert-desc">Cemento por agotarse. Arq. García fue notificada. Reposición estimada: 2 días hábiles.</div></div>
-      </div>
-      <div class="bottom-nav">
-        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
-        <button class="nav-btn active" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
-      </div>
+<!-- ════════ MODALS ════════ -->
+
+<!-- Edit Name -->
+<div class="modal-overlay" id="modal-editname">
+  <div class="modal-box">
+    <div class="modal-title">Editar nombre del cliente <button class="modal-close" onclick="closeModal('modal-editname')">✕</button></div>
+    <div class="field-group"><label>Nombre completo</label><input id="edit-name-inp" type="text" placeholder="Nombre del cliente"></div>
+    <button class="btn-primary" onclick="saveName()">Guardar</button>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="modal-overlay" id="modal-progress">
+  <div class="modal-box">
+    <div class="modal-title">Editar avance del proyecto <button class="modal-close" onclick="closeModal('modal-progress')">✕</button></div>
+    <div class="field-group"><label>Porcentaje de avance (<span id="prog-val-lbl">65</span>%)</label>
+      <input type="range" id="prog-slider" min="0" max="100" value="65" oninput="updateProgSlider(this.value)" style="width:100%;margin-top:6px;accent-color:var(--navy)">
     </div>
+    <button class="btn-primary" onclick="saveProgress()">Guardar avance</button>
+  </div>
+</div>
 
-    <!-- ═══════════ MENSAJES ═══════════ -->
-    <div class="screen" id="s-mensajes">
-      <div class="status-bar" style="padding-top:44px"><span>9:41</span><div class="status-icons"><div class="signal"><span></span><span></span><span></span><span></span></div></div></div>
-      <div class="msg-head">
-        <div class="avatar">AG</div>
-        <div><div class="sv-name">Arq. Ana García</div><div class="sv-role">Supervisora · Unión Constructiva GT</div></div>
-        <div class="online-dot"></div>
-      </div>
-      <div class="msgs-area" id="msg-area">
-        <div class="bubble-wrap them"><div class="bubble">Buenos días Sr. Pocón. Le confirmo que hoy iniciamos con el cableado eléctrico de sala y comedor.</div><div class="btime">Lun 9:10</div></div>
-        <div class="bubble-wrap me"><div class="bubble">Gracias Arq. García, ¿cuándo subirán las fotos al sistema?</div><div class="btime">Lun 9:32</div></div>
-        <div class="bubble-wrap them"><div class="bubble">Las fotos ya están en el historial. Subimos 12 registros hoy. El avance general llegó al 62%.</div><div class="btime">Hoy 14:45</div></div>
-        <div class="bubble-wrap them"><div class="bubble">Le notifico que el cemento está por agotarse. Ya gestioné la reposición, estará en obra en 2 días hábiles.</div><div class="btime">Hoy 15:02</div></div>
-        <div class="bubble-wrap me"><div class="bubble">Entendido. ¿Eso afecta el cronograma?</div><div class="btime">Hoy 15:10</div></div>
-      </div>
-      <div class="input-area">
-        <input class="msg-inp" id="msg-inp" type="text" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendMsg()">
-        <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg></button>
-      </div>
-      <div class="bottom-nav">
-        <button class="nav-btn" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Inicio<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>Fotos<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('cronograma')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Cronograma<div class="nav-active-dot"></div></button>
-        <button class="nav-btn" onclick="goTo('materiales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Materiales<div class="nav-active-dot"></div></button>
-        <button class="nav-btn active" onclick="goTo('mensajes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Mensajes<div class="nav-active-dot"></div></button>
-      </div>
-    </div>
+<!-- Edit Material -->
+<div class="modal-overlay" id="modal-editmat">
+  <div class="modal-box">
+    <div class="modal-title">Editar material <button class="modal-close" onclick="closeModal('modal-editmat')">✕</button></div>
+    <input type="hidden" id="edit-mat-idx">
+    <div class="field-group"><label>Nombre del material</label><input id="edit-mat-name" type="text"></div>
+    <div class="field-group"><label>Descripción / cantidad</label><input id="edit-mat-qty" type="text"></div>
+    <div class="field-group"><label>% disponible (0–100)</label><input id="edit-mat-pct" type="number" min="0" max="100"></div>
+    <button class="btn-primary" onclick="saveMat()">Guardar</button>
+    <button class="btn-secondary" onclick="deleteMat()" style="color:var(--red)">Eliminar material</button>
+  </div>
+</div>
 
-  </div><!-- phone-inner -->
-</div><!-- phone-outer -->
+<!-- Add Material -->
+<div class="modal-overlay" id="modal-addmat">
+  <div class="modal-box">
+    <div class="modal-title">Nuevo material <button class="modal-close" onclick="closeModal('modal-addmat')">✕</button></div>
+    <div class="field-group"><label>Nombre</label><input id="new-mat-name" type="text" placeholder="Ej: Arena amarilla"></div>
+    <div class="field-group"><label>Descripción / cantidad</label><input id="new-mat-qty" type="text" placeholder="Ej: 10 m³ entregados"></div>
+    <div class="field-group"><label>% disponible</label><input id="new-mat-pct" type="number" min="0" max="100" value="100"></div>
+    <button class="btn-primary" onclick="addMat()">Agregar material</button>
+  </div>
+</div>
+
+<!-- Add User -->
+<div class="modal-overlay" id="modal-adduser">
+  <div class="modal-box">
+    <div class="modal-title">Nuevo cliente <button class="modal-close" onclick="closeModal('modal-adduser')">✕</button></div>
+    <div class="field-group"><label>Nombre completo</label><input id="new-user-name" type="text" placeholder="Ej: Fernando Tucubal"></div>
+    <div class="field-group"><label>Correo electrónico</label><input id="new-user-email" type="email" placeholder="correo@gmail.com"></div>
+    <div class="field-group"><label>Contraseña</label><input id="new-user-pass" type="password" placeholder="••••••••"></div>
+    <button class="btn-primary" onclick="addUser()">Crear cliente</button>
+  </div>
+</div>
+
+</div><!-- phone -->
+</div><!-- phone-wrap -->
 
 <script>
-  function goTo(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('s-' + id).classList.add('active');
-    if (id === 'dashboard') {
-      setTimeout(() => { document.getElementById('main-bar').style.width = '62%'; }, 120);
-    }
+// ── STATE ──────────────────────────────────────────────────────────────
+const S = {
+  progress: 65,
+  clientName: 'Julio Pocón',
+  supervisor: { name: 'Arq. Ana García', initials: 'AG' },
+  project: { name: 'Proyecto Vivienda · 6×15m', week: 7 },
+  photos: [],
+  materials: [
+    { name:'Block 15×20 cm', qty:'580 unidades · Entregadas: 800', pct:73 },
+    { name:'Hierro #3 (varillas)', qty:'45 varillas · Entregadas: 60', pct:75 },
+    { name:'Arena amarilla (m³)', qty:'3.5 m³ restantes · Usados: 6.5', pct:35 },
+    { name:'Cemento (sacos)', qty:'8 sacos · Usados: 45 de 53', pct:15 },
+    { name:'Cable eléctrico (mts)', qty:'180 mts · Entregados: 250', pct:72 },
+    { name:'Tubo PVC 1/2"', qty:'22 unidades restantes', pct:55 },
+  ],
+  tasks: [
+    { fase:'Fase 1 — Planificación', weeks:'Semanas 1–2', color:'#2D6A0A', status:'done', items:['Reunión inicial con cliente','Diseño preliminar y planos','Elaboración de presupuesto','Firma de contrato'], done:[true,true,true,true] },
+    { fase:'Fase 2 — Trámites', weeks:'Semanas 3–4', color:'#2D6A0A', status:'done', items:['Gestión permiso municipal','Compra inicial de materiales','Planificación logística'], done:[true,true,true] },
+    { fase:'Fase 3 — Obra gruesa', weeks:'Semanas 5–10', color:'#2D6A0A', status:'done', items:['Movimiento de tierra','Cimentación','Estructura y vigas','Muros perimetrales'], done:[true,true,true,true] },
+    { fase:'Fase 4 — Instalaciones', weeks:'Semanas 11–16 · En progreso', color:'#BA7517', status:'active', items:['Instalación eléctrica principal','Plomería principal','Cableado secundario','Revestimientos y pisos','Pintura interior','Carpintería y puertas'], done:[true,true,false,false,false,false] },
+    { fase:'Fase 5 — Entrega', weeks:'Semana 17', color:'#ccc', status:'pending', items:['Inspección final','Correcciones menores','Entrega formal al cliente'], done:[false,false,false] },
+  ],
+  users: [
+    { name:'Julio Pocón', email:'julio@ejemplo.com', pass:'1234' },
+    { name:'Fernando Tucubal', email:'fernando@ejemplo.com', pass:'1234' },
+    { name:'Edgar Choc', email:'edgar@ejemplo.com', pass:'1234' },
+  ],
+  notifications: [],
+  editMatIdx: -1,
+};
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById('s-'+id).classList.add('on');
+  if(id==='dashboard') { setTimeout(()=>{ document.getElementById('prog-bar').style.width=S.progress+'%'; },120); updateStats(); }
+  if(id==='materiales') renderMaterials();
+  if(id==='cronograma') renderCronograma();
+  if(id==='admin') renderAdmin();
+  if(id==='fotos') renderPhotos();
+  if(id==='mensajes') { const a=document.getElementById('msgs-area'); a.scrollTop=a.scrollHeight; }
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value.trim();
+  if(email==='admin' && pass==='admin') { go('admin'); return; }
+  const user = S.users.find(u => u.email===email && u.pass===pass);
+  if(user) {
+    S.clientName = user.name;
+    document.getElementById('d-name').innerHTML = S.clientName+' <span class="edit-ico">✎</span>';
+    go('dashboard');
+  } else if(!email && !pass) {
+    // demo: just enter with first user
+    S.clientName = S.users[0].name;
+    document.getElementById('d-name').innerHTML = S.clientName+' <span class="edit-ico">✎</span>';
+    go('dashboard');
+  } else {
+    showToast('Error de acceso','Correo o contraseña incorrectos');
   }
-  function toggleFase(id) {
-    document.getElementById(id).classList.toggle('open');
-  }
-  function sendMsg() {
-    var inp = document.getElementById('msg-inp');
-    var txt = inp.value.trim();
-    if (!txt) return;
-    var area = document.getElementById('msg-area');
-    var d = document.createElement('div');
-    d.className = 'bubble-wrap me';
-    d.innerHTML = '<div class="bubble">' + txt + '</div><div class="btime">Ahora</div>';
-    area.appendChild(d);
-    inp.value = '';
-    area.scrollTop = area.scrollHeight;
-    setTimeout(function() {
-      var r = document.createElement('div');
-      r.className = 'bubble-wrap them';
-      r.innerHTML = '<div class="bubble">Recibido Sr. Pocón. Le respondo a la brevedad.</div><div class="btime">Ahora</div>';
-      area.appendChild(r);
-      area.scrollTop = area.scrollHeight;
-    }, 1300);
-  }
-  setTimeout(() => { document.getElementById('main-bar').style.width = '62%'; }, 400);
+}
+
+function quickLogin(idx) {
+  const u = S.users[idx];
+  document.getElementById('l-email').value = u.email;
+  document.getElementById('l-pass').value = u.pass;
+  S.clientName = u.name;
+  document.getElementById('d-name').innerHTML = S.clientName+' <span class="edit-ico">✎</span>';
+  go('dashboard');
+}
+
+function renderUserChips() {
+  const wrap = document.getElementById('user-chips');
+  wrap.innerHTML = S.users.map((u,i)=>
+    `<div class="user-chip" onclick="quickLogin(${i})"><span>${u.name.split(' ')[0]}</span></div>`
+  ).join('');
+}
+
+// ── STATS ──────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('prog-pct-display').textContent = S.progress+'%';
+  document.getElementById('prog-bar').style.width = S.progress+'%';
+  document.getElementById('stat-fotos').textContent = S.photos.length;
+  document.getElementById('d-name').innerHTML = S.clientName+' <span class="edit-ico">✎</span>';
+  const total = S.tasks.reduce((a,f)=>a+f.items.length,0);
+  const done  = S.tasks.reduce((a,f)=>a+f.done.filter(Boolean).length,0);
+  document.getElementById('stat-tareas').textContent = done;
+  document.getElementById('stat-tareas-hint').textContent = 'de '+total+' planificadas';
+  const alerts = S.materials.filter(m=>m.pct<20).length;
+  document.getElementById('stat-alertas').textContent = alerts;
+  document.getElementById('foto-count-badge').textContent = S.photos.length+' fotos';
+  document.getElementById('foto-project-name').textContent = S.project.name;
+  document.getElementById('week-badge').textContent = 'Sem. '+S.project.week+' de 17';
+}
+
+// ── MODALS ─────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('on'); });
+});
+
+// ── EDIT NAME ─────────────────────────────────────────────────────────
+function saveName() {
+  const v = document.getElementById('edit-name-inp').value.trim();
+  if(v) { S.clientName=v; updateStats(); showToast('Nombre actualizado',v); }
+  closeModal('modal-editname');
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────────────
+function updateProgSlider(v) { document.getElementById('prog-val-lbl').textContent=v; }
+function saveProgress() {
+  S.progress = parseInt(document.getElementById('prog-slider').value);
+  updateStats();
+  showToast('Avance actualizado', S.progress+'% del proyecto');
+  closeModal('modal-progress');
+}
+
+// ── PHOTOS ────────────────────────────────────────────────────────────
+function handleFiles(files) {
+  Array.from(files).forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      S.photos.unshift({ src:e.target.result, name:file.name.replace(/\.[^.]+$/,''), date:new Date().toLocaleDateString('es-GT') });
+      renderPhotos();
+      updateStats();
+      addActivity('📷 Foto agregada: '+file.name.replace(/\.[^.]+$/,''), 'Historial fotográfico', 'ai-b', 'fotos');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function renderPhotos() {
+  const g = document.getElementById('photo-grid');
+  if(!S.photos.length) { g.innerHTML='<div style="grid-column:span 2;text-align:center;padding:20px;color:var(--muted);font-size:12px">Aún no has subido fotos. ¡Toca arriba para agregar!</div>'; return; }
+  g.innerHTML = S.photos.map((p,i)=>`
+    <div class="photo-card">
+      <div class="photo-thumb"><img src="${p.src}" alt="${p.name}"></div>
+      ${i===0?'<span class="photo-badge">NUEVA</span>':''}
+      <button class="photo-del" onclick="deletePhoto(${i})">✕</button>
+      <div class="pm"><div class="pm-t">${p.name}</div><div class="pm-d">${p.date}</div></div>
+    </div>`).join('');
+}
+function deletePhoto(i) { S.photos.splice(i,1); renderPhotos(); updateStats(); }
+
+// ── CRONOGRAMA ────────────────────────────────────────────────────────
+function renderCronograma() {
+  const el = document.getElementById('cron-scroll');
+  el.innerHTML = S.tasks.map((fase,fi)=>`
+    <div class="fase">
+      <div class="fase-hdr" onclick="toggleFase(${fi})">
+        <div class="fhl"><div class="fdot" style="background:${fase.color}"></div>
+          <div><div class="fn">${fase.fase}</div><div class="fw">${fase.weeks}</div></div>
+        </div>
+        <span class="${fase.status==='done'?'bd':fase.status==='active'?'ba':'bp'}">${fase.status==='done'?'Completada':fase.status==='active'?'En progreso':'Pendiente'}</span>
+      </div>
+      <div class="fase-body ${fase.status==='active'?'open':''}" id="fase-body-${fi}">
+        ${fase.items.map((t,ti)=>`
+          <div class="task" onclick="toggleTask(${fi},${ti})">
+            <div class="chk ${fase.done[ti]?'done':''}"></div>
+            <span class="task-txt ${fase.done[ti]?'done':''}">${t}</span>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function toggleFase(fi) {
+  const el = document.getElementById('fase-body-'+fi);
+  el.classList.toggle('open');
+}
+function toggleTask(fi,ti) {
+  S.tasks[fi].done[ti] = !S.tasks[fi].done[ti];
+  // Auto-update fase status
+  const fase = S.tasks[fi];
+  const allDone = fase.done.every(Boolean);
+  const anyDone = fase.done.some(Boolean);
+  if(allDone) fase.status='done', fase.color='#2D6A0A';
+  else if(anyDone) fase.status='active', fase.color='#BA7517';
+  else if(fi>0) fase.status='pending', fase.color='#ccc';
+  renderCronograma();
+  updateStats();
+  if(S.tasks[fi].done[ti]) showToast('Tarea completada ✓', S.tasks[fi].items[ti]);
+}
+
+// ── MATERIALS ─────────────────────────────────────────────────────────
+function renderMaterials() {
+  const icons = ['#E6F1FB|#185FA5','#EAF3DE|#2D6A0A','#FAEEDA|#854F0B','#FCEBEB|#A32D2D','#EEEDFE|#534AB7','#EAF3DE|#2D6A0A'];
+  const svgs  = [
+    '<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 9h20M2 15h20M12 3v18"/>',
+    '<path d="M4 7h16M4 12h16M4 17h10"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+    '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    '<polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+  ];
+  const alerts = S.materials.filter(m=>m.pct<20).length;
+  document.getElementById('alert-badge').textContent = alerts+' alerta'+(alerts!==1?'s':'');
+
+  const el = document.getElementById('mat-list');
+  el.innerHTML = S.materials.map((m,i)=>{
+    const cls = m.pct>=40?'ok':m.pct>=20?'warn':'low';
+    const ic = icons[i%icons.length].split('|');
+    return `<div class="mat-row ${cls}">
+      <div class="mat-ico" style="background:${ic[0]}"><svg viewBox="0 0 24 24" fill="none" stroke="${ic[1]}" stroke-width="1.8">${svgs[i%svgs.length]}</svg></div>
+      <div class="mat-info" onclick="openEditMat(${i})">
+        <div class="mat-name">${m.name}</div>
+        <div class="mat-qty">${m.qty}</div>
+      </div>
+      <div class="mat-right">
+        <div class="mat-pct">${m.pct}%</div>
+        <div class="mbar"><div class="mfill" style="width:${m.pct}%"></div></div>
+      </div>
+    </div>`;
+  }).join('') + (S.materials.some(m=>m.pct<20)?`<div class="alert-box"><div class="al-t">Acción requerida</div><div class="al-d">${S.materials.filter(m=>m.pct<20).map(m=>m.name).join(', ')} por agotarse. Se recomienda reposición inmediata.</div></div>`:'');
+}
+
+function openEditMat(i) {
+  S.editMatIdx=i;
+  const m=S.materials[i];
+  document.getElementById('edit-mat-idx').value=i;
+  document.getElementById('edit-mat-name').value=m.name;
+  document.getElementById('edit-mat-qty').value=m.qty;
+  document.getElementById('edit-mat-pct').value=m.pct;
+  openModal('modal-editmat');
+}
+function saveMat() {
+  const i=S.editMatIdx;
+  S.materials[i].name  = document.getElementById('edit-mat-name').value;
+  S.materials[i].qty   = document.getElementById('edit-mat-qty').value;
+  S.materials[i].pct   = parseInt(document.getElementById('edit-mat-pct').value)||0;
+  renderMaterials(); updateStats();
+  showToast('Material actualizado', S.materials[i].name);
+  closeModal('modal-editmat');
+}
+function deleteMat() {
+  S.materials.splice(S.editMatIdx,1);
+  renderMaterials(); updateStats();
+  closeModal('modal-editmat');
+}
+function addMat() {
+  const name = document.getElementById('new-mat-name').value.trim();
+  if(!name) return;
+  S.materials.push({ name, qty:document.getElementById('new-mat-qty').value, pct:parseInt(document.getElementById('new-mat-pct').value)||100 });
+  renderMaterials(); updateStats();
+  document.getElementById('new-mat-name').value='';
+  document.getElementById('new-mat-qty').value='';
+  document.getElementById('new-mat-pct').value='100';
+  showToast('Material agregado', name);
+  closeModal('modal-addmat');
+}
+
+// ── MESSAGES ──────────────────────────────────────────────────────────
+function sendMsg() {
+  const inp=document.getElementById('msg-inp'), txt=inp.value.trim();
+  if(!txt) return;
+  const area=document.getElementById('msgs-area');
+  const d=document.createElement('div'); d.className='bw me';
+  d.innerHTML=`<div class="bub">${txt}</div><div class="bt">Ahora</div>`;
+  area.appendChild(d); inp.value=''; area.scrollTop=area.scrollHeight;
+  setTimeout(()=>{
+    const r=document.createElement('div'); r.className='bw them';
+    r.innerHTML=`<div class="bub">Recibido. Le confirmo a la brevedad.</div><div class="bt">Ahora</div>`;
+    area.appendChild(r); area.scrollTop=area.scrollHeight;
+  },1300);
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────
+function renderAdmin() {
+  const el = document.getElementById('user-admin-list');
+  el.innerHTML = S.users.map((u,i)=>`
+    <div class="admin-row">
+      <div class="avatar" style="width:34px;height:34px;font-size:11px">${u.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+      <div class="admin-row-info"><div class="admin-row-name">${u.name}</div><div class="admin-row-sub">${u.email}</div></div>
+      <button class="btn-sm red" onclick="deleteUser(${i})">✕</button>
+    </div>`).join('');
+  // fill supervisor inputs
+  document.getElementById('sup-name-input').value = S.supervisor.name;
+  document.getElementById('sup-initials-input').value = S.supervisor.initials;
+  document.getElementById('proj-name-inp').value = S.project.name;
+  document.getElementById('proj-week-inp').value = S.project.week;
+}
+
+function addUser() {
+  const name=document.getElementById('new-user-name').value.trim();
+  const email=document.getElementById('new-user-email').value.trim();
+  const pass=document.getElementById('new-user-pass').value.trim();
+  if(!name||!email||!pass) { showToast('Campos incompletos','Llena todos los campos'); return; }
+  S.users.push({name,email,pass});
+  renderAdmin(); renderUserChips();
+  document.getElementById('new-user-name').value='';
+  document.getElementById('new-user-email').value='';
+  document.getElementById('new-user-pass').value='';
+  showToast('Cliente creado ✓', name+' · '+email);
+  closeModal('modal-adduser');
+}
+function deleteUser(i) { S.users.splice(i,1); renderAdmin(); renderUserChips(); }
+
+function saveSupervisor() {
+  S.supervisor.name = document.getElementById('sup-name-input').value.trim() || S.supervisor.name;
+  S.supervisor.initials = document.getElementById('sup-initials-input').value.trim().toUpperCase().slice(0,2) || S.supervisor.initials;
+  document.getElementById('sup-name').textContent = S.supervisor.name;
+  document.getElementById('sup-avatar').textContent = S.supervisor.initials;
+  showToast('Supervisor actualizado', S.supervisor.name);
+}
+
+function saveProject() {
+  S.project.name = document.getElementById('proj-name-inp').value.trim() || S.project.name;
+  S.project.week = parseInt(document.getElementById('proj-week-inp').value) || S.project.week;
+  updateStats();
+  showToast('Proyecto actualizado', S.project.name);
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────
+const notifMessages = [
+  ['📸 Nuevas fotos disponibles','12 fotos del avance semanal subidas'],
+  ['📋 Reporte semanal publicado','Semana '+S.project.week+' · Revisión disponible'],
+  ['⚠️ Alerta de materiales','Cemento al 15% — reposición requerida'],
+  ['✅ Tarea completada','Instalación eléctrica principal finalizada'],
+  ['🏗️ Hito alcanzado','Fase de obra gruesa completada al 100%'],
+  ['📅 Recordatorio','Reunión de seguimiento programada mañana'],
+];
+let notifIdx=0;
+
+function triggerNotif() {
+  const n=notifMessages[notifIdx%notifMessages.length]; notifIdx++;
+  showToast(n[0],n[1]);
+  addActivity(n[0], n[1], 'ai-g', 'dashboard');
+}
+function fireNotif() {
+  const title=document.getElementById('notif-title-inp').value||'Notificación';
+  const msg  =document.getElementById('notif-msg-inp').value||'Mensaje nuevo';
+  showToast('🔔 '+title, msg);
+  addActivity('🔔 '+title, msg, 'ai-b', 'dashboard');
+}
+function showToast(title, sub) {
+  const t=document.getElementById('toast');
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-sub').textContent=sub;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+function addActivity(title, desc, ico, dest) {
+  const feed=document.getElementById('activity-feed');
+  const d=document.createElement('div'); d.className='act-row'; d.onclick=()=>go(dest);
+  d.innerHTML=`<div class="act-ico ${ico}"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg></div><div class="act-body"><div class="a-title">${title}</div><div class="a-desc">${desc}</div></div><div class="a-time">Ahora</div>`;
+  feed.insertBefore(d, feed.firstChild);
+  if(feed.children.length>6) feed.removeChild(feed.lastChild);
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────
+function updateClock() {
+  const now=new Date();
+  const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  ['clock','clock2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t;});
+}
+updateClock(); setInterval(updateClock,30000);
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderUserChips();
+renderMaterials();
+renderCronograma();
+updateStats();
+setTimeout(()=>{ document.getElementById('prog-bar').style.width=S.progress+'%'; },400);
 </script>
 </body>
 </html>
